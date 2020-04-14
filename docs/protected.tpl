@@ -222,15 +222,15 @@ body {
 </li>
         
 <li>
+  <a href="../analysis.html">Analysis</a>
+</li>
+        
+<li>
   <a href="../setup.html">Setup</a>
 </li>
         
 <li>
   <a href="../license.html">License</a>
-</li>
-        
-<li>
-  <a href="../notes.html">Notes</a>
 </li>
         
 <li>
