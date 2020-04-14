@@ -1,0 +1,1 @@
+sos run release.sos clean && sos run release.sos -s force
