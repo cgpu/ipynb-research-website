@@ -123,6 +123,45 @@ function sortDataFrame(id, n, dtype) {
 </script>
 
 <script>
+$( document ).ready(function(){
+            var cfg={'threshold':{{ nb.get('metadata', {}).get('toc', {}).get('threshold', '3') }},     // depth of toc (number of levels)
+             'number_sections': false,
+             'toc_cell': false,          // useless here
+             'toc_window_display': true, // display the toc window
+             "toc_section_display": "block", // display toc contents in the window
+             'sideBar':true,       // sidebar or floating window
+             'navigate_menu':false       // navigation menu (only in liveNotebook -- do not change)
+            }
+            var st={};                  // some variables used in the script
+            st.rendering_toc_cell = false;
+            st.config_loaded = false;
+            st.extension_initialized=false;
+            st.nbcontainer_marginleft = $('#notebook-container').css('margin-left')
+            st.nbcontainer_marginright = $('#notebook-container').css('margin-right')
+            st.nbcontainer_width = $('#notebook-container').css('width')
+            st.oldTocHeight = undefined
+            st.cell_toc = undefined;
+            st.toc_index=0;
+            // fire the main function with these parameters
+            table_of_contents(cfg, st);
+            var file=notesDict[$("h1:first").attr("id")];
+            $("#toc-level0 a").css("color","#126dce");
+            $('a[href="#'+$("h1:first").attr("id")+'"]').hide()
+            var docs=notesArray;
+            var docs_map=notesArrayMap;
+            var pos=notesArray.indexOf(file);
+            for (var a=pos;a>=0;a--){
+                  $('<li><a href="'+docs[a]+'.html"><font color="#073642"><b>'+docs_map[docs[a]].replace(/_/g," ")+'</b></font></a></li>').insertBefore("#toc-level0 li:eq(0)");
+            }
+            $('a[href="'+file+'.html'+'"]').css("color","#126dce");
+            for (var a=pos+1;a<docs.length;a++){
+                  $(".toc #toc-level0").append('<li><a href="'+docs[a]+'.html"><font color="#073642"><b>'+docs_map[docs[a]].replace(/_/g," ")+'</b></font></a></li>');
+            }
+            // $("#toc-header").hide(); // comment out because it prevents search bar from displaying
+    });
+</script>
+
+<script>
 // manage active state of menu based on current page
 $(document).ready(function () {
   // active menu anchor
@@ -148,7 +187,7 @@ $(document).ready(function () {
 
 
 
-<title>Divvy data exploration project</title>
+<title>Introduction to literate programming with Jupyter Notebooks</title>
 
 <style type = "text/css">
 body {
@@ -173,7 +212,7 @@ body {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">Divvy data exploration project</a>
+      <a class="navbar-brand" href="../index.html">Introduction to literate programming with Jupyter Notebooks</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -202,7 +241,7 @@ body {
         
 <ul class="nav navbar-nav navbar-right">
 <li>
-   <a href="http://github.com/stephenslab/ipynb-website"> source </a>
+   <a href="https://github.com/cgpu/ipynb-research-website"> source </a>
 </li>
 </ul>
         
@@ -214,7 +253,7 @@ body {
 
 {% block footer %}
 <hr>
-&copy; 2017 Peter Carbonetto &amp; Gao Wang
+&copy; 2020 cgpu
 </div>
 </div>
 </body>

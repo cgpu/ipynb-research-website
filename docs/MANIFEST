@@ -1,9 +1,9 @@
 docs/978d7a1fcb3fce3d2a322aa666902622f9d4430c.html
 docs/analysis.tpl
-docs/analysis/first-glance.html
-docs/analysis/seasonal-trends.html
-docs/analysis/station-map.html
-docs/analysis/time-of-day-trends.html
+docs/analysis/0-dependencies.html
+docs/analysis/1-eda-with-pandas.html
+docs/analysis/2-plotting-in-R.html
+docs/analysis/3-reproducible-publications.html
 docs/index.html
 docs/index.tpl
 docs/js/docs.js

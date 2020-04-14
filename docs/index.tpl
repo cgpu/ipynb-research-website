@@ -10,7 +10,7 @@
 <meta name="ipynb_website:version" content="0.9.7" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<title>Divvy data exploration project</title>
+<title>Introduction to literate programming with Jupyter Notebooks</title>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 <link href="site_libs/bootstrap-3.3.5/css/readable.min.css" rel="stylesheet" />
@@ -176,7 +176,7 @@ $(document).ready(function () {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">Divvy data exploration project</a>
+      <a class="navbar-brand" href="index.html">Introduction to literate programming with Jupyter Notebooks</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -205,7 +205,7 @@ $(document).ready(function () {
     
 <ul class="nav navbar-nav navbar-right">
 <li>
-   <a href="http://github.com/stephenslab/ipynb-website"> source </a>
+   <a href="https://github.com/cgpu/ipynb-research-website"> source </a>
 </li>
 </ul>
         
@@ -216,7 +216,7 @@ $(document).ready(function () {
 {%- endblock header -%}
 {% block footer %}
 <hr>
-&copy; 2017 Peter Carbonetto &amp; Gao Wang
+&copy; 2020 cgpu
 <!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
 
 </div>

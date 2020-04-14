@@ -1,6 +1,6 @@
-var analysisArray = ['first-glance', 'station-map', 'time-of-day-trends', 'seasonal-trends']
-var analysisDict = {'A-first-glance-at-the-Divvy-data-1': 'first-glance', 'Divvy-usage-over-the-year-1': 'seasonal-trends', 'A-map-of-the-Divvy-stations-in-Chicago-1': 'station-map', 'Divvy-usage-by-time-of-day-1': 'time-of-day-trends'}
-var analysisArrayMap = {'first-glance': 'A first glance at the Divvy data', 'seasonal-trends': 'Divvy usage over the year', 'station-map': 'A map of the Divvy stat ... s in Chicago', 'time-of-day-trends': 'Divvy usage by time-of-day'}
+var analysisArray = ['0-dependencies', '1-eda-with-pandas', '2-plotting-in-R', '3-reproducible-publications']
+var analysisDict = {'Installing-packages-1': '0-dependencies', 'Exploratory-Data-Analysis-(EDA)-of-the-iris-dataset-in-python-1': '1-eda-with-pandas', 'Plotting-in-R-with-ggplot2-and-friends-1': '2-plotting-in-R', 'Reproducible-publications-with-Jupyter-Notebooks-1': '3-reproducible-publications'}
+var analysisArrayMap = {'0-dependencies': 'Installing packages', '1-eda-with-pandas': 'Exploratory Data Analys ... et in python', '2-plotting-in-R': 'Plotting in R with ggpl ... and friends', '3-reproducible-publications': 'Reproducible publicatio ... er Notebooks'}
 var setupArray = []
 var setupDict = {}
 var setupArrayMap = {}

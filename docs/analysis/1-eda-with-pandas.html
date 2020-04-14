@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="ipynb_website:version" content="0.9.7" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="../css/jt.css">
+<link rel="stylesheet" type="text/css" href="../css/readable.css">
+<link rel="stylesheet" type="text/css" href="../css/toc2.css">
+<link href="../site_libs/jqueryui-1.11.4/jquery-ui.css">
+<link rel="stylesheet" href="../site_libs/bootstrap-3.3.5/css/readable.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="../site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<link rel="stylesheet"
+      href="../site_libs/highlightjs/null.min.css"
+      type="text/css" />
+<script src="../site_libs/highlightjs/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+<script src="../js/doc_toc.js"></script>
+<script src="../js/docs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script>
+    MathJax.Hub.Config({
+        extensions: ["tex2jax.js"],
+        jax: ["input/TeX", "output/HTML-CSS"],
+        tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true
+        },
+        "HTML-CSS": {
+            preferredFont: "TeX",
+            availableFonts: ["TeX"],
+            styles: {
+                scale: 110,
+                ".MathJax_Display": {
+                    "font-size": "110%",
+                }
+            }
+        }
+    });
+</script>
+<script>
+function filterDataFrame(id) {
+    var input = document.getElementById("search_" + id);
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById("dataframe_" + id);
+    var tr = table.getElementsByTagName("tr");
+    // Loop through all table rows, and hide those who don't match the search query
+    for (var i = 1; i < tr.length; i++) {
+        for (var j = 0; j < tr[i].cells.length; ++j) {
+            var matched = false;
+            if (tr[i].cells[j].innerHTML.toUpperCase().indexOf(filter) != -1) {
+                tr[i].style.display = "";
+                matched = true
+                break;
+            }
+            if (!matched)
+                tr[i].style.display = "none";
+        }
+    }
+}
+function sortDataFrame(id, n, dtype) {
+    var table = document.getElementById("dataframe_" + id);
+    var tb = table.tBodies[0]; // use `<tbody>` to ignore `<thead>` and `<tfoot>` rows
+    var tr = Array.prototype.slice.call(tb.rows, 0); // put rows into array
+    if (dtype === 'numeric') {
+        var fn = function(a, b) { 
+            return parseFloat(a.cells[n].textContent) <= parseFloat(b.cells[n].textContent) ? -1 : 1;
+        }
+    } else {
+        var fn = function(a, b) {
+            var c = a.cells[n].textContent.trim().localeCompare(b.cells[n].textContent.trim()); 
+            return c > 0 ? 1 : (c < 0 ? -1 : 0) }
+    }
+    var isSorted = function(array, fn) {
+        if (array.length < 2)
+            return 1;
+        var direction = fn(array[0], array[1]); 
+        for (var i = 1; i < array.length - 1; ++i) {
+            var d = fn(array[i], array[i+1]);
+            if (d == 0)
+                continue;
+            else if (direction == 0)
+                direction = d;
+            else if (direction != d)
+                return 0;
+            }
+        return direction;
+    }
+    var sorted = isSorted(tr, fn);
+    if (sorted == 1 || sorted == -1) {
+        // if sorted already, reverse it
+        for(var i = tr.length - 1; i >= 0; --i)
+            tb.appendChild(tr[i]); // append each row in order
+    } else {
+        tr = tr.sort(fn);
+        for(var i = 0; i < tr.length; ++i)
+            tb.appendChild(tr[i]); // append each row in order
+    }
+}
+</script>
+<script>
+$( document ).ready(function(){
+            var cfg={'threshold':3,     // depth of toc (number of levels)
+             'number_sections': false,
+             'toc_cell': false,          // useless here
+             'toc_window_display': true, // display the toc window
+             "toc_section_display": "block", // display toc contents in the window
+             'sideBar':true,       // sidebar or floating window
+             'navigate_menu':false       // navigation menu (only in liveNotebook -- do not change)
+            }
+            var st={};                  // some variables used in the script
+            st.rendering_toc_cell = false;
+            st.config_loaded = false;
+            st.extension_initialized=false;
+            st.nbcontainer_marginleft = $('#notebook-container').css('margin-left')
+            st.nbcontainer_marginright = $('#notebook-container').css('margin-right')
+            st.nbcontainer_width = $('#notebook-container').css('width')
+            st.oldTocHeight = undefined
+            st.cell_toc = undefined;
+            st.toc_index=0;
+            // fire the main function with these parameters
+            table_of_contents(cfg, st);
+            var file=analysisDict[$("h1:first").attr("id")];
+            $("#toc-level0 a").css("color","#126dce");
+            $('a[href="#'+$("h1:first").attr("id")+'"]').hide()
+            var docs=analysisArray;
+            var docs_map=analysisArrayMap;
+            var pos=analysisArray.indexOf(file);
+            for (var a=pos;a>=0;a--){
+                  $('<li><a href="'+docs[a]+'.html"><font color="#073642"><b>'+docs_map[docs[a]].replace(/_/g," ")+'</b></font></a></li>').insertBefore("#toc-level0 li:eq(0)");
+            }
+            $('a[href="'+file+'.html'+'"]').css("color","#126dce");
+            for (var a=pos+1;a<docs.length;a++){
+                  $(".toc #toc-level0").append('<li><a href="'+docs[a]+'.html"><font color="#073642"><b>'+docs_map[docs[a]].replace(/_/g," ")+'</b></font></a></li>');
+            }
+            // $("#toc-header").hide(); // comment out because it prevents search bar from displaying
+    });
+</script>
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+  // mark it active
+  menuAnchor.parent().addClass('active');
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+<div class="container-fluid main-container">
+<!-- tabsets -->
+<script src="../site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+<title>Introduction to literate programming with Jupyter Notebooks</title>
+<style type = "text/css">
+body {
+  padding-top: 66px;
+  padding-bottom: 40px;
+}
+</style>
+</head>
+<body>
+<div tabindex="-1" id="notebook" class="border-box-sizing">
+<div class="container" id="notebook-container">
+<!-- code folding -->
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../index.html">Introduction to literate programming with Jupyter Notebooks</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+<li>
+  <a href="../index.html">Overview</a>
+</li>
+<li>
+  <a href="../setup.html">Setup</a>
+</li>
+<li>
+  <a href="../license.html">License</a>
+</li>
+<li>
+  <a href="../notes.html">Notes</a>
+</li>
+<li>
+  <a href="../protected.html">Protected</a>
+</li>
+      </ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+   <a href="https://github.com/cgpu/ipynb-research-website"> source </a>
+</li>
+</ul>
+      </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Exploratory-Data-Analysis-(EDA)-of-the-iris-dataset-in-python">Exploratory Data Analysis (EDA) of the <em>iris</em> dataset in python<a class="anchor-link" href="#Exploratory-Data-Analysis-(EDA)-of-the-iris-dataset-in-python">&#182;</a></h1><p><strong>email</strong>: christina@lifebit.ai</p>
+<p>(or create a new issue in the workshop's github repo <a href="https://github.com/lifebit-ai/jax-jupyter/issues">here</a>)</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Before starting, let's set a selection of fav colors, to use in our plots:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_palette</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sandybrown&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;palevioletred&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;cornflowerblue&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;gold&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;tomato&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;greenyellow&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;palevioletred&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;darkcyan&#39;</span><span class="p">]</span>
+<span class="c1"># this is my palette</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># How-to here:  http://bit.ly/jupy_display_image</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">IPython.core.display</span> <span class="kn">import</span> <span class="n">HTML</span> 
+<span class="n">Image</span><span class="p">(</span><span class="n">url</span><span class="o">=</span> <span class="s2">&quot;https://miro.medium.com/max/735/1*g3NVaR0mjWmzL3widxXO6w.png&quot;</span><span class="p">,</span>  <span class="n">width</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span> <span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Let's-add-a-bit-of-interactivity:">Let's add a bit of interactivity:<a class="anchor-link" href="#Let's-add-a-bit-of-interactivity:">&#182;</a></h1><p>This bit allows for light blue highlighting when hovering over tables and stuff. <br></p>
+<p>You can check this out in a bit, when we will be printing the <strong><code>head()</code></strong> of a panDataFrame :).</p>
+<p>Just hover your cursor above rows;<br>
+alt rows are highlighted.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># This bit just allows for highlighting when hovering over tables and stuff basically</span>
+<span class="kn">from</span> <span class="nn">IPython.core.interactiveshell</span> <span class="kn">import</span> <span class="n">InteractiveShell</span>
+<span class="n">InteractiveShell</span><span class="o">.</span><span class="n">ast_node_interactivity</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Let's-take-care-of-dependencies:">Let's take care of dependencies:<a class="anchor-link" href="#Let's-take-care-of-dependencies:">&#182;</a></h2><p>Make sure you have already installed the following packages:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">## Importing dependencies:    </span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">datasets</span> <span class="c1"># we will use iris dataset for this exercise </span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span>  <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="c1">#1.11</span>
+<span class="c1"># Ignore warnings </span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Select style to use for your upcoming plots
+(I will choose <code>ggplot</code> ❤️)</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;ggplot&#39;</span><span class="p">)</span>
+<span class="c1">#To see all available style run the following command:</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">available</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Now-we're-ready-to-start!">Now we're ready to start!<a class="anchor-link" href="#Now-we're-ready-to-start!">&#182;</a></h2><p>Let's choose our favorite dataset, <code>iris</code> .</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">## Accesing sklearn&#39;s datasets and Assigning dataset to the variable `iris`:</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">datasets</span> 
+<span class="n">iris</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_iris</span><span class="p">()</span>
+<span class="c1">## EXPLORING OBJECT TYPE of iris dataset | w8_4_it, it&#39;s a new one;</span>
+<span class="nb">type</span><span class="p">(</span><span class="n">iris</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Hmm.. Well, thanks a <b>Bunch</b>!  :p</p>
+<p>But what a <b>Bunch</b> <em>really</em> is?</p>
+<p>According to sklearn documentation: <a href="http://bit.ly/sklearn_dataset_iris">http://bit.ly/sklearn_dataset_iris</a></p>
+<p><strong>BUNCH</strong>:<br>
+Dictionary-like object; the interesting attributes are: <br>
+<b>‘data’</b>,          the data to learn, <br>
+<b>‘target’</b>,        the classification labels, <br>
+<b>‘target_names’</b>,  the meaning of the labels, <br>
+<b>‘feature_names’</b>, the meaning of the features, and <br>
+<b>‘DESCR’</b>,         the full description of the dataset. <br></p>
+<p>For more info about what a Bunch object check here: <a href="http://bit.ly/pyBunch">http://bit.ly/pyBunch</a> <br>
+or alt check your var explorer if working with Spyder #<em>ignore if you're a Command-Line Text Editor  snob :p </em></p>
+<p>Well, since a <strong><code>Bunch</code></strong> is a  <strong>"Dictionary-like object"</strong>, let's check its <strong><code>.keys()</code></strong> :</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">iris</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Let's-check-the-DESCR:">Let's check the DESCR:<a class="anchor-link" href="#Let's-check-the-DESCR:">&#182;</a></h2><p>One of the <strong><code>.keys()</code></strong> is named <code>DESCR</code>, no wild guesses needed to figure out what this's about:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">iris</span><span class="p">[</span><span class="s1">&#39;DESCR&#39;</span><span class="p">])</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Plenty of info for the iris dataset. Now let's move on.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Creating-a-table-ready-for-writing-to-.csv-from-the-sklearn-Bunch-object:">Creating a table ready for writing to .csv from the sklearn Bunch object:<a class="anchor-link" href="#Creating-a-table-ready-for-writing-to-.csv-from-the-sklearn-Bunch-object:">&#182;</a></h3><p>First we will combine the <code>data</code> object, that contains the numerical variables</p>
+<ul>
+<li><code>sepal length (cm)</code></li>
+<li><code>sepal width (cm)</code>  </li>
+<li><code>petal length (cm)</code> </li>
+<li><code>petal width (cm)</code> </li>
+</ul>
+<p>with the recoded species dummy variable named</p>
+<ul>
+<li><code>target</code>. </li>
+</ul>
+<p>The <code>iris['data']</code> and the <code>iris['target']</code> object are both np arrays, hence we will use  <code>np.c_</code> (<code>numpy concatenate</code>) to add the two numpy arrays together, before adding it to the Pandas Dataframe. The column names called <code>feature_names</code> are stored in a list so we can use the <code>+</code> operator to add a new element, the name of the last column (<code>target</code>).</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">iris</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])</span>
+<span class="nb">type</span><span class="p">(</span><span class="n">iris</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">])</span>
+<span class="nb">type</span><span class="p">(</span><span class="n">iris</span><span class="p">[</span><span class="s1">&#39;feature_names&#39;</span><span class="p">])</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Writing-files-from-Pandas-Dataframes">Writing files from Pandas Dataframes<a class="anchor-link" href="#Writing-files-from-Pandas-Dataframes">&#182;</a></h3><p>The dataframe looks great! Time to save it in a file</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Reading-files-from-.csv-into-Pandas-Dataframe">Reading files from <code>.csv</code> into Pandas Dataframe<a class="anchor-link" href="#Reading-files-from-.csv-into-Pandas-Dataframe">&#182;</a></h3><p>We can now read back our save <code>.csv</code> file using the pandas method <code>read_csv</code></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Let's-explore">Let's explore<a class="anchor-link" href="#Let's-explore">&#182;</a></h2><h3 id="A.-The-object-types-that-hold-our-data,--using-type()-built-in-function:">A. The object types that hold our data,  using <code>type()</code> built-in function:<a class="anchor-link" href="#A.-The-object-types-that-hold-our-data,--using-type()-built-in-function:">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">iris</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]),</span> <span class="nb">type</span><span class="p">(</span><span class="n">iris</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">])</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="B.-Their-dimension-using-(iris['data'].shape):">B. Their dimension using <code>(iris['data'].shape)</code>:<a class="anchor-link" href="#B.-Their-dimension-using-(iris['data'].shape):">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#1.34</span>
+<span class="c1">#Our measurements for each feature live here:</span>
+<span class="n">iris</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="c1">#[o]: (150,4) aka # N x m == Instances x Attributes and so on == observations x feautures,</span>
+<span class="n">iris</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][:</span><span class="mi">4</span><span class="p">]</span>    <span class="c1">#[o]: a preview of the first 4 obserevations </span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We have measurements from <br>
+<strong>150</strong> plants <em>(rows)</em>, for <br>
+<strong>4</strong> of their features. <em>(columns)</em></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="C.-How-their-labels-(iris.target_names)-look-like:">C. How their labels <code>(iris.target_names)</code> look like:<a class="anchor-link" href="#C.-How-their-labels-(iris.target_names)-look-like:">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Labels have an alias: 0, 1, 2, and are matched to the index of target_names</span>
+<span class="c1"># We can see this by checking out in the variable explorer if using Spyder</span>
+<span class="n">iris</span><span class="o">.</span><span class="n">target_names</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Pythonic-sklearn-style-of-objects">Pythonic sklearn style of objects<a class="anchor-link" href="#Pythonic-sklearn-style-of-objects">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Nice-to-meet-you-X-and-y!">Nice to meet you <code>X</code> and <code>y</code>!<a class="anchor-link" href="#Nice-to-meet-you-X-and-y!">&#182;</a></h2><p>For sklearn compatibility we will assign our data and target objects to <strong><code>X,y</code></strong> respectively</p>
+<h1 id="X,"><strong><code>X</code></strong>,<a class="anchor-link" href="#X,">&#182;</a></h1><ul>
+<li><strong>capital EX</strong>, almost always hosts the data values in sklearn supervised tasks , and can be either an numpy array or matrix.</li>
+</ul>
+<h1 id="y,"><strong><code>y</code></strong>,<a class="anchor-link" href="#y,">&#182;</a></h1><ul>
+<li><strong>psi</strong>, is usually the vector with the labels, usually as <code>int</code>, and can be either an numpy array (N,) or a lists if you're like me and love your lists:) -- and turtle speed that comes with them xD</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Let's-now-assign-our-data-to-X-and-the-labels-vector-to-y:">Let's now assign our data to <strong><code>X</code></strong> and the labels vector to <strong><code>y</code></strong>:<a class="anchor-link" href="#Let's-now-assign-our-data-to-X-and-the-labels-vector-to-y:">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Thus check that the X.shape[0] == y.shape[0] </span>
+<span class="c1">## Enough with the talking, let&#39;s proceed:</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">iris</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">iris</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span>
+<span class="c1">## Check if dimensions match:</span>
+<span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># If [o]: True, proceed | every plant comes with a species label</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Meet-the-Pandas!">Meet the Pandas!<a class="anchor-link" href="#Meet-the-Pandas!">&#182;</a></h1><p>Say hello to this cool pylib!<br>
+Pandas is a cool pylib that helps tidy up our data, from plain <code>numpy.ndarray</code> to a neat <em>R-like</em> :P <code>DataFrame</code>.<br> 
+Perfect for data cleaning, inspecting sparse matrices, manipulating rows and columns.<br></p>
+<p>Most probably obvious, but let's point out that this will make your sklearn iters a tad slower.<br>
+So convert back to numpy arrays freely!</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">IPython.core.display</span> <span class="kn">import</span> <span class="n">HTML</span> 
+<span class="n">Image</span><span class="p">(</span><span class="n">url</span><span class="o">=</span> <span class="s2">&quot;http://bit.ly/pyndas&quot;</span><span class="p">,</span>  <span class="n">width</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span> <span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="From-numpy.ndarray-into-a-pretty-(,)-tidy-pandas.DataFrame:">From <strong><code>numpy.ndarray</code></strong> into a pretty (,) tidy <strong><code>pandas.DataFrame</code></strong>:<a class="anchor-link" href="#From-numpy.ndarray-into-a-pretty-(,)-tidy-pandas.DataFrame:">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Cool, now we have them like so in 2 objects, <strong><code>X</code></strong> and <strong><code>y</code></strong>, perfect for sklearn.</p>
+<p>but let's <b>*tidy*</b> the data up a little bit,<br>
+ and create a <b>pandas dataframe</b>.<br> 
+ Maybe also add the column names, so we know what those 4 measurements for each flower are.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="for-sklearn-every-dataset-should-be:-N-x-features">for <code>sklearn</code> every dataset should be: N x features<a class="anchor-link" href="#for-sklearn-every-dataset-should-be:-N-x-features">&#182;</a></h2><p>Let's create the <code>DataFrame</code> with the correct orientation,<br></p>
+<ul>
+<li>ROWS - observations</li>
+<li>COLUMNS - features</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Tidy up X in a neat Dataframe called df:</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span>    <span class="o">=</span>  <span class="n">X</span><span class="p">,</span> 
+                  <span class="n">columns</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Adding-rowNames-and-columnNames:">Adding <code>rowNames</code> and <code>columnNames</code>:<a class="anchor-link" href="#Adding-rowNames-and-columnNames:">&#182;</a></h2><p>For a <strong><code>pandas.Dataframe</code></strong> an <strong><code>index</code></strong> is what we would call a row name.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># http://bit.ly/pandas_DataFrame</span>
+<span class="n">ddf</span> <span class="o">=</span>  <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span>    <span class="o">=</span> <span class="n">X</span><span class="p">,</span> 
+                    <span class="n">index</span>   <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">target</span><span class="p">,</span>              <span class="c1"># aka ROW NAMES!</span>
+                    <span class="n">columns</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">feature_names</span><span class="p">,</span> 
+                    <span class="n">dtype</span>   <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                    <span class="n">copy</span>    <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">ddf</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Above, we have changed the index from <strong><code>0</code></strong>,1,2,3,4 .. to the correspondind label {0,1,2}.<br>
+But this isn't the most convenient thing to do.<br>
+It would be better if we could add an extra column, <br>to hold the labels of each observation in the same row.<br>
+We can do that by using the <strong><code>pandas.Series()</code></strong> functionality.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Augmented-Dataset-w/-Labels:">Augmented Dataset w/ Labels:<a class="anchor-link" href="#Augmented-Dataset-w/-Labels:">&#182;</a></h1><p>Add an extra column with <code>pd.Series()</code></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Creating-a-list-with-iris-subspecies-names:">Creating a list with iris subspecies names:<a class="anchor-link" href="#Creating-a-list-with-iris-subspecies-names:">&#182;</a></h3><p>Using a the <b>y</b> vector to create a list named <b>y_labs</b>, <br>
+with <strong><code>len(y_labs) = df.shape[0]</code></strong>, <br>
+but instead of the label alias, <b>0,1,2</b> <br>
+we will have the actual names, <b>setosa, versicolor, virginica</b></p>
+<p>Yes, this is  <strong><code>m e m o r y</code></strong>  abuse but chill, it's just a tutorial m8!<br>
+We will use this label list, and add it as an extra column to the <strong><code>d f</code></strong>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Let's-add-a-label-column-to-df:">Let's add a label column to <code>df</code>:<a class="anchor-link" href="#Let's-add-a-label-column-to-df:">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Loop over y, and replace y&#39;s 0,1,2 with iris.target_names[0] or [1] or [2] in y_labs for setose, virginica, versicolor respectively.</span>
+<span class="n">y_labs</span> <span class="o">=</span> <span class="p">[</span><span class="n">iris</span><span class="o">.</span><span class="n">target_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">y</span><span class="p">)]</span>
+<span class="n">y_labs</span><span class="p">[:</span><span class="mi">5</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_labs</span><span class="p">)</span> <span class="o">==</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="From-list-to-compatible-for-concatenation-pandas.Series:">From <code>list</code> to compatible-for-concatenation <code>pandas.Series</code>:<a class="anchor-link" href="#From-list-to-compatible-for-concatenation-pandas.Series:">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Before adding the list of a labels as a dataframe column in the dataframe,<br>
+we will convert it from <strong><code>list</code></strong> to <strong><code>pandas.Series</code></strong></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="But-what-is-that-pandas.Series-now??-Bring-help()!">But what is that <code>pandas.Series</code> now?? Bring <code>help()</code>!<a class="anchor-link" href="#But-what-is-that-pandas.Series-now??-Bring-help()!">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">## Comment out the following in case of an emergency (not really :P)</span>
+<span class="c1"># help (pd.Series)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Tack always knows best: http://bit.ly/add_column_PanDataFrame </span>
+<span class="n">se</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y_labs</span><span class="p">)</span>
+<span class="n">lab_df</span> <span class="o">=</span> <span class="n">df</span> 
+<span class="n">lab_df</span><span class="p">[</span><span class="s1">&#39;species&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">se</span><span class="o">.</span><span class="n">values</span>
+<span class="c1">#Let&#39;s print the updated, augmented DataFrame:</span>
+<span class="n">lab_df</span><span class="o">.</span><span class="n">tail</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Reading-and-writing-files">Reading and writing files<a class="anchor-link" href="#Reading-and-writing-files">&#182;</a></h2><p>Unfortunately, most datasets don't come in a tidy <code>bunch</code> format. So let's practice with more realistics examples. We will  use the dataframe of the <code>iris</code> dataset we already loaded from <code>sklearn</code>, to write it in a <code>.csv</code> file. Subsequently, we will read this <code>.csv</code> file into a Pandas Dataframe as we would typically do with a file generated from our analyses. Then, we will continue exploring the dataset.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lab_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">lab_df</span><span class="p">)</span>
+<span class="n">lab_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path_or_buf</span> <span class="o">=</span> <span class="s2">&quot;iris.csv&quot;</span><span class="p">,</span> <span class="c1">#filename, could be full path</span>
+               <span class="n">sep</span>    <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="p">,</span> 
+               <span class="n">header</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="c1"># write column names</span>
+               <span class="n">index</span>  <span class="o">=</span> <span class="kc">False</span> <span class="c1"># DO NOT write row names</span>
+              <span class="p">)</span> 
+<span class="c1"># This will write a file named iris.csv</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iris_from_csv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath_or_buffer</span><span class="o">=</span><span class="s2">&quot;../data/1-eda-with-pandas/iris.csv&quot;</span><span class="p">)</span>
+<span class="c1"># Inspect the loaded dataframe:</span>
+<span class="n">iris_from_csv</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Labels-instead-of-numeric-indices:">Labels instead of numeric indices:<a class="anchor-link" href="#Labels-instead-of-numeric-indices:">&#182;</a></h3><p>Lose the numbered index and use labels instead.<br></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iris_from_csv</span> <span class="o">=</span> <span class="n">iris_from_csv</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">iris_from_csv</span><span class="p">[</span><span class="s1">&#39;species&#39;</span><span class="p">])</span> <span class="c1"># this sets  the rownames</span>
+<span class="n">iris_from_csv</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span> <span class="o">=</span><span class="mi">2</span> <span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="R---like-dataframe-slicing-in-Pandas:"><code>R</code> - like dataframe slicing in <code>Pandas</code>:<a class="anchor-link" href="#R---like-dataframe-slicing-in-Pandas:">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3>Verbose MODE: ON,  <em>".. if values in column are <b><i> <font size="4", color="yellowgreen">equal</font></i></b> to.."</em></h3>
+<p>"Give me the part of <code>lab_df</code> for which the value of the <code>lab_df['species']</code> column is equal to <code>'virginica'</code>"</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Verbose MODE: ON</span>
+<span class="c1"># Give me the part of the lab_df for which the value of the lab_df &#39;species&#39; column is equal to &#39;virginica&#39;</span>
+<span class="n">setosa_df</span> <span class="o">=</span> <span class="n">lab_df</span><span class="p">[</span><span class="n">lab_df</span><span class="p">[</span><span class="s1">&#39;species&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;setosa&#39;</span><span class="p">]</span>
+<span class="n">setosa_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Verbose-MODE:-ON,-&quot;..-if-values-in-column-are-NOT-equal-to..&quot;">Verbose MODE: ON, <em>".. if values in column are NOT equal to.."</em><a class="anchor-link" href="#Verbose-MODE:-ON,-&quot;..-if-values-in-column-are-NOT-equal-to..&quot;">&#182;</a></h3><p>"Give me the part of <code>lab_df</code> for which the value of the <code>lab_df['species']</code> column is <strong>NOT</strong> equal to <code>'virginica'</code>"</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Verbose MODE: ON</span>
+<span class="c1"># Give me the part of the lab_df for which the value of the lab_df &#39;species&#39; column is NOT equal to &#39;virginica&#39;</span>
+<span class="n">NOT_virginica</span> <span class="o">=</span> <span class="n">lab_df</span><span class="p">[</span><span class="n">lab_df</span><span class="p">[</span><span class="s1">&#39;species&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;virginica&#39;</span><span class="p">]</span>
+<span class="n">NOT_virginica</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="n">n</span> <span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="How-to:-Remove-a-DataFrame-column">How-to: Remove a <code>DataFrame</code> column<a class="anchor-link" href="#How-to:-Remove-a-DataFrame-column">&#182;</a></h2><p><strong>Found here: <a href="https://chrisalbon.com/python/pandas_dropping_column_and_rows.html">https://chrisalbon.com/python/pandas_dropping_column_and_rows.html</a></strong><br><br>
+Now if you want to plot the data, slicing for excluding the <em>non</em>-numeric <strong><code>['species']</code></strong> column, might be a hustle.</p>
+<p>So we will <strong><code>drop</code></strong> that one for now!<BR>
+We will be using the <strong><code>DataFrame.drop()'</code></strong> defining as arguments:<br></p>
+<ul>
+<li>the name of the column to delete, e.g. <strong><code>['species']</code></strong> </li>
+<li>and the <strong><code>axis=1</code></strong>.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#https://chrisalbon.com/python/pandas_dropping_column_and_rows.html</span>
+<span class="n">NOT_virginica</span> <span class="o">=</span> <span class="n">NOT_virginica</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;species&#39;</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">NOT_virginica</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Too-many-variables-already!-o_O">Too many variables already! o_O<a class="anchor-link" href="#Too-many-variables-already!-o_O">&#182;</a></h2><p>Ok, at some point, we will need to take a look out at all the variables that we've created along the way.<br>
+<strong><code>Spyder</code></strong> has a neat interactive <strong>variable explorer</strong>, but <em>not</em> the <strong>dashboard-y</strong> style,<br> 
+which we very much enjoy in <strong>Jupyter Notebooks</strong>.<br></p>
+<p>So, we have to somehow find a <strong>magic!</strong> trick to substitute for its functionality,<br> 
+while working over here in <strong>.ipynb</strong> mode.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Magic!-in-Jupy-Notebook:-Variable-Explorer-(kind-of)">Magic! in <code>Jupy Notebook</code>: Variable Explorer <em>(kind of)</em><a class="anchor-link" href="#Magic!-in-Jupy-Notebook:-Variable-Explorer-(kind-of)">&#182;</a></h2><p>Up until now we have created several variables, objects, containers <code>#younameit</code> that hold our data, metadata etc<br>
+Aah, <strong><code>Spyder</code></strong> 's variable explorer <strong>O_o</strong>, where are you..</p>
+<p>Eh! There you are! <br>
+<a href="http://bit.ly/stack_variable_xplrer_jupy">http://bit.ly/stack_variable_xplrer_jupy</a> <br>
+or if you don't mind the lack of interactivity, try the following (hint: <strong><code>whos</code></strong> )</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">whos</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="EDA:-Exploratory-Data-Analysis">EDA: Exploratory Data Analysis<a class="anchor-link" href="#EDA:-Exploratory-Data-Analysis">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="i)-Numerical-EDA">i) Numerical EDA<a class="anchor-link" href="#i)-Numerical-EDA">&#182;</a></h3><p>Perfect! <br>
+From <strong><code>Bunch</code></strong> to a tidy <strong><code>DataFrame</code></strong>; success! <br>
+We learned a lot about the <code>pandas.Dataframe</code> as well.</p>
+<p>Now, let's get back to the actual content of our data and get to know them a little better;<br></p>
+<ul>
+<li><b> df.head()</b>, a glimpse of how the first rows of the DataFrame looks like  </li>
+<li><b> df.describe()</b>, some descriptive summary stats</li>
+<li><b> df.info() </b>,    a look into our N x m, dimension, #instances etc </li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Let's-print-the-first-few-rows-to-check-out-how-the-dataframe-looks-like:">Let's print the first few rows to check out how the dataframe looks like:<a class="anchor-link" href="#Let's-print-the-first-few-rows-to-check-out-how-the-dataframe-looks-like:">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Let's-print-some-info-about-the-dataset,-eg:">Let's print some info about the dataset, eg:<a class="anchor-link" href="#Let's-print-some-info-about-the-dataset,-eg:">&#182;</a></h4><ul>
+<li>Number of instances <br></li>
+<li>Type of objects <br></li>
+<li>Memory usage </li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="p">[:][:</span><span class="mi">4</span><span class="p">]</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="None-NaNs-or-NAs!">None NaNs or NAs!<a class="anchor-link" href="#None-NaNs-or-NAs!">&#182;</a></h1><h3 id="Quality-control:-Checkpoint-0">Quality control: Checkpoint 0<a class="anchor-link" href="#Quality-control:-Checkpoint-0">&#182;</a></h3><p>Check for missing or NaN values in your <code>DataFrame</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Not fully happy with this yet:</span>
+<span class="n">df</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="A-better-hack-to-check-for-null-cells:">A better hack to check for null cells:<a class="anchor-link" href="#A-better-hack-to-check-for-null-cells:">&#182;</a></h3><p>Found here: <a href="https://stackoverflow.com/questions/42921854/how-to-check-if-a-particular-cell-in-pandas-dataframe-isnull">https://stackoverflow.com/questions/42921854/how-to-check-if-a-particular-cell-in-pandas-dataframe-isnull</a></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># https://stackoverflow.com/questions/42921854/how-to-check-if-a-particular-cell-in-pandas-dataframe-isnull</span>
+<span class="n">df</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">(),</span>   <span class="c1"># Q: &quot;Is there any empty cell in the DataFrame?&quot;</span>
+<span class="n">df</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">(),</span>  <span class="c1"># Q: &quot;Is there any missing value?&quot;                # FASTEEER! use %timeit and see 4yourself</span>
+<span class="n">df</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>  <span class="c1"># Q: &quot;How many missing valuess are ther?&quot;</span>
+<span class="n">df</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>    <span class="c1"># Q: &quot;Count the total number of empty cells.&quot;</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Cool, no missing values, as expected for  <b> <font size="6", color="BA55D3">iris</font></b> .</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Let's-now-check-out-some-summary-stats-about-the-data:">Let's now check out some summary stats about the data:<a class="anchor-link" href="#Let's-now-check-out-some-summary-stats-about-the-data:">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Visual-EDA:">Visual EDA:<a class="anchor-link" href="#Visual-EDA:">&#182;</a></h1><p><br>
+<img src="https://i.imgflip.com/1w14pk.jpg" style="width: 50%; height: 50%" title="made at imgflip.com"/></p>
+<p><br>Numerical EDA is necessary, but not very intuitive.<br>
+Let's <strong>plot</strong> the data and explore a little more.<br><br></p>
+<p>We will be using a rather cool #DataViz library, mostly used for statistics related plots, named <strong>"<code>seaborn</code>"</strong>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Quirky-sns-syntax-found-here:">Quirky sns syntax found here:<a class="anchor-link" href="#Quirky-sns-syntax-found-here:">&#182;</a></h3><p><a href="http://bit.ly/sns_quirky_syntax">http://bit.ly/sns_quirky_syntax</a></p>
+<h3 id="Plots-for-EDA:">Plots for EDA:<a class="anchor-link" href="#Plots-for-EDA:">&#182;</a></h3><p><a href="http://bit.ly/kaggle_eda_dotpy">http://bit.ly/kaggle_eda_dotpy</a></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Before starting let's take a quick look at the dataframe</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="a.-Scatter-plot">a. Scatter plot<a class="anchor-link" href="#a.-Scatter-plot">&#182;</a></h1><p><strong><code>sns.FacetGrid</code></strong> Documentation: <a href="http://bit.ly/sns_FacetGrid">http://bit.ly/sns_FacetGrid</a></p>
+<p>Correlation between two features, here: <code>sepal length</code> ~ <code>sepal width</code>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Quirky sns syntax found here: http://bit.ly/sns_quirky_syntax</span>
+<span class="c1"># We&#39;ll use seaborn&#39;s FacetGrid to color the scatterplot by species</span>
+<span class="c1"># Be prepared - this one&#39;s slow.</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">(</span><span class="n">data</span>          <span class="o">=</span> <span class="n">df</span><span class="p">,</span> 
+              <span class="n">hue</span>           <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+              <span class="n">height</span>          <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> 
+              <span class="n">aspect</span>        <span class="o">=</span> <span class="mf">1.15</span><span class="p">,</span> 
+              <span class="n">palette</span>       <span class="o">=</span> <span class="n">my_palette</span><span class="p">,</span> 
+              <span class="n">legend_out</span>    <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
+              <span class="n">despine</span>       <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
+              <span class="n">margin_titles</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>\
+    <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">,</span> <span class="s2">&quot;sepal length (cm)&quot;</span><span class="p">,</span> <span class="s2">&quot;sepal width (cm)&quot;</span><span class="p">)</span>\
+    <span class="o">.</span><span class="n">add_legend</span><span class="p">()</span>\
+<span class="c1">#    .fig.suptitle(&#39;seaborn FacetGrid scatter plot for iris dataset&#39;, )</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Correlation of sepal width to sepal length by species&#39;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">14</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;scatterplot_FacetGrid_iris&#39;</span><span class="p">,</span> 
+            <span class="n">dpi</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="b.-Boxplots">b. Boxplots<a class="anchor-link" href="#b.-Boxplots">&#182;</a></h1><p>Seaborn Documentation: <a href="http://bit.ly/sns_boxplot">http://bit.ly/sns_boxplot</a></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="&#8226;-sns.boxplot():">&#8226; <code>sns.boxplot()</code>:<a class="anchor-link" href="#&#8226;-sns.boxplot():">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># We can look at an individual feature in Seaborn through a boxplot</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span>        <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+            <span class="n">x</span>           <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+            <span class="n">y</span>           <span class="o">=</span> <span class="s1">&#39;petal length (cm)&#39;</span><span class="p">,</span>
+            <span class="n">hue</span>         <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+            <span class="n">palette</span>     <span class="o">=</span> <span class="n">my_palette</span><span class="p">,</span>
+            <span class="n">saturation</span>  <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span> 
+            <span class="n">width</span>       <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> 
+            <span class="n">fliersize</span>   <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> 
+            <span class="n">linewidth</span>   <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="c1"># how thick the box outline is</span>
+            <span class="n">whis</span>        <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="c1"># 1,5 IQR past the low and high quartiles to extend the plot whiskers. Points outside this range will be identified as outliers.            </span>
+            <span class="n">notch</span>       <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;boxplot for iris dataset (petal length)&#39;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;boxplot_iris&#39;</span><span class="p">,</span> <span class="n">dpi</span> <span class="o">=</span> <span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="&#8226;-sns.boxplot()-+-sns.stripplot-hybrid:">&#8226; <code>sns.boxplot()</code> + <code>sns.stripplot</code> hybrid:<a class="anchor-link" href="#&#8226;-sns.boxplot()-+-sns.stripplot-hybrid:">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># One way we can extend this plot is adding a layer of individual points on top of</span>
+<span class="c1"># it through Seaborn&#39;s striplot</span>
+<span class="c1"># </span>
+<span class="c1"># We&#39;ll use jitter=True so that all the points don&#39;t fall in single vertical lines</span>
+<span class="c1"># above the species</span>
+<span class="c1">#</span>
+<span class="c1"># Saving the resulting axes as ax each time causes the resulting plot to be shown</span>
+<span class="c1"># on top of the previous axes</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span>        <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+                 <span class="n">x</span>           <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+                 <span class="n">y</span>           <span class="o">=</span> <span class="s1">&#39;petal length (cm)&#39;</span><span class="p">,</span>
+                 <span class="n">hue</span>         <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+                 <span class="n">palette</span>     <span class="o">=</span> <span class="n">my_palette</span><span class="p">,</span>
+                 <span class="n">saturation</span>  <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span> 
+                 <span class="n">width</span>       <span class="o">=</span> <span class="o">.</span><span class="mi">65</span><span class="p">,</span> <span class="c1"># width of boxes or if lazy, margin L and R from boxes</span>
+                 <span class="n">fliersize</span>   <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>   <span class="c1"># outlier symbol size | because 7 == o ari8mos tou psefti! </span>
+                 <span class="n">linewidth</span>   <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> 
+                 <span class="n">whis</span>        <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="c1"># 1,5 IQR past the low and high quartiles to extend the plot whiskers. Points outside this range will be identified as outliers.            </span>
+                 <span class="n">notch</span>       <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">stripplot</span><span class="p">(</span><span class="n">data</span>      <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+                   <span class="n">x</span>         <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span>
+                   <span class="n">y</span>         <span class="o">=</span> <span class="s1">&#39;petal length (cm)&#39;</span><span class="p">,</span> 
+                   <span class="n">jitter</span>    <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                   <span class="n">linewidth</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+                   <span class="n">palette</span>   <span class="o">=</span> <span class="n">my_palette</span><span class="p">,</span>
+                   <span class="n">size</span>      <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                   <span class="n">edgecolor</span> <span class="o">=</span> <span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+<span class="c1">#fig = plt.figure()</span>
+<span class="c1">#fig.set_size_inches(11.7, 8.27)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;seaborn boxplot / stripplot hybrid plot for iris dataset&#39;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;boxplot_stripplot_iris&#39;</span><span class="p">,</span> <span class="n">dpi</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="&#8226;-sns.boxplot()-+-sns.swarmplot-hybrid:">&#8226; <code>sns.boxplot()</code> + <code>sns.swarmplot</code> hybrid:<a class="anchor-link" href="#&#8226;-sns.boxplot()-+-sns.swarmplot-hybrid:">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># One way we can extend this plot is adding a layer of individual points on top of</span>
+<span class="c1"># it through Seaborn&#39;s striplot</span>
+<span class="c1"># </span>
+<span class="c1"># We&#39;ll use jitter=True so that all the points don&#39;t fall in single vertical lines</span>
+<span class="c1"># above the species</span>
+<span class="c1">#</span>
+<span class="c1"># Saving the resulting axes as ax each time causes the resulting plot to be shown</span>
+<span class="c1"># on top of the previous axes</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span>        <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+                 <span class="n">x</span>           <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+                 <span class="n">y</span>           <span class="o">=</span> <span class="s1">&#39;petal length (cm)&#39;</span><span class="p">,</span>
+                 <span class="n">hue</span>         <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+                 <span class="n">palette</span>     <span class="o">=</span> <span class="n">my_palette</span><span class="p">,</span>
+                 <span class="n">saturation</span>  <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span> 
+                 <span class="n">width</span>       <span class="o">=</span> <span class="mf">0.765</span><span class="p">,</span> 
+                 <span class="n">fliersize</span>   <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> 
+                 <span class="n">linewidth</span>   <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> 
+                 <span class="n">whis</span>        <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="c1"># 1,5 IQR past the low and high quartiles to extend the plot whiskers. Points outside this range will be identified as outliers.            </span>
+                 <span class="n">notch</span>       <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">swarmplot</span><span class="p">(</span><span class="n">data</span>      <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+                   <span class="n">x</span>         <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span>
+                   <span class="n">y</span>         <span class="o">=</span> <span class="s1">&#39;petal length (cm)&#39;</span><span class="p">,</span>
+                   <span class="n">palette</span>   <span class="o">=</span> <span class="n">my_palette</span><span class="p">,</span>
+                   <span class="n">size</span>      <span class="o">=</span> <span class="mf">2.5</span><span class="p">,</span>
+                   <span class="n">dodge</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;seaborn boxplot/swarmplot for iris dataset (petal length)&#39;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;boxplot_swarmplot_iris&#39;</span><span class="p">,</span> <span class="n">dpi</span> <span class="o">=</span> <span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># One way we can extend this plot is by adding a layer of individual points on top of</span>
+<span class="c1"># it through Seaborn&#39;s striplot</span>
+<span class="c1"># </span>
+<span class="c1"># We&#39;ll use jitter=True so that all the points don&#39;t fall in single vertical lines</span>
+<span class="c1"># above the species</span>
+<span class="c1">#</span>
+<span class="c1"># Saving the resulting axes as ax each time causes the resulting plot to be shown</span>
+<span class="c1"># on top of the previous axes</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">boxenplot</span><span class="p">(</span><span class="n">data</span>        <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+                <span class="n">x</span>           <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span>
+                <span class="n">y</span>           <span class="o">=</span> <span class="s1">&#39;petal length (cm)&#39;</span><span class="p">,</span>
+                <span class="n">hue</span>         <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+                <span class="n">palette</span>     <span class="o">=</span> <span class="n">my_palette</span><span class="p">,</span>
+                <span class="n">saturation</span>  <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span> 
+                <span class="n">width</span>       <span class="o">=</span> <span class="mf">0.765</span><span class="p">,</span> 
+                <span class="n">k_depth</span><span class="o">=</span><span class="s1">&#39;proportion&#39;</span><span class="p">,</span> 
+                <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;exponential&#39;</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                <span class="n">outlier_prop</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">swarmplot</span><span class="p">(</span><span class="n">data</span>      <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+                   <span class="n">x</span>         <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span>
+                   <span class="n">y</span>         <span class="o">=</span> <span class="s1">&#39;petal length (cm)&#39;</span><span class="p">,</span>
+                   <span class="n">palette</span>   <span class="o">=</span> <span class="n">my_palette</span><span class="p">,</span>
+                   <span class="n">size</span>      <span class="o">=</span> <span class="mf">2.5</span><span class="p">,</span> 
+                   <span class="n">dodge</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;seaborn lvplot/swarmplot for iris dataset (petal length)&#39;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;boxplot_swarmplot_iris&#39;</span><span class="p">,</span> <span class="n">dpi</span> <span class="o">=</span> <span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For a detailed help message about the functions, you can call the help() method as shown below:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="c1">#help(sns.swarmplot())</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="c.-Violin-Plots">c. Violin Plots<a class="anchor-link" href="#c.-Violin-Plots">&#182;</a></h1><p>A violin plot combines the benefits of the previous two plots and simplifies them <br>
+Denser regions of the data are fatter, and sparser thiner in a violin plot</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">violinplot</span><span class="p">(</span><span class="n">data</span>        <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+               <span class="n">x</span>           <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+               <span class="n">y</span>           <span class="o">=</span> <span class="s1">&#39;petal length (cm)&#39;</span><span class="p">,</span>
+               <span class="n">hue</span>         <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+               <span class="n">palette</span>     <span class="o">=</span> <span class="n">my_palette</span><span class="p">,</span>
+               <span class="n">saturation</span>  <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span> 
+               <span class="n">width</span>       <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+               <span class="n">fliersize</span>   <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> 
+               <span class="n">linewidth</span>   <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="c1"># how thick the box outline is</span>
+               <span class="n">whis</span>        <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="c1"># 1,5 IQR past the low and high quartiles to extend the plot whiskers. Points outside this range will be identified as outliers.            </span>
+               <span class="n">notch</span>       <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="c1"># For exact placing, the title can be added as text:</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span>
+         <span class="mf">0.5</span><span class="p">,</span>
+         <span class="n">horizontalalignment</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
+         <span class="n">fontsize</span>  <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> 
+         <span class="n">s</span> <span class="o">=</span> <span class="mi">5</span> <span class="p">)</span> 
+         <span class="c1">#transform = ax2.transAxes)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;seaborn violin plot for iris dataset (petal length)&#39;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;violin_iris&#39;</span><span class="p">,</span> <span class="n">dpi</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">data</span>      <span class="o">=</span> <span class="n">df</span><span class="p">,</span> 
+             <span class="n">hue</span>       <span class="o">=</span> <span class="s1">&#39;species&#39;</span><span class="p">,</span> 
+             <span class="n">palette</span>   <span class="o">=</span> <span class="n">my_palette</span><span class="p">,</span> 
+             <span class="n">kind</span>      <span class="o">=</span> <span class="s1">&#39;scatter&#39;</span><span class="p">,</span> 
+             <span class="n">diag_kind</span> <span class="o">=</span> <span class="s1">&#39;kde&#39;</span><span class="p">,</span> <span class="c1"># kde</span>
+             <span class="n">markers</span>   <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+             <span class="n">height</span>    <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> 
+             <span class="n">aspect</span>    <span class="o">=</span> <span class="mf">1.6</span> <span class="p">)</span>\
+    <span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;seaborn pairplot for iris dataset&#39;</span><span class="p">,</span> 
+                  <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">18</span><span class="p">,</span> 
+                  <span class="n">horizontalalignment</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span> 
+                  <span class="n">verticalalignment</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
+                  <span class="n">y</span> <span class="o">=</span> <span class="mf">1.02</span><span class="p">)</span>    <span class="c1">#adjust title position # https://stackoverflow.com/questions/12750355/python-matplotlib-figure-title-overlaps-axes-label-when-using-twiny</span>
+<span class="c1"># For exact placing, the title can be added as text:</span>
+<span class="c1">##plt.text(0.5, 1.08, figure_title,</span>
+<span class="c1">##        horizontalalignment=&#39;center&#39;,</span>
+<span class="c1">##         fontsize=20,</span>
+<span class="c1">##        transform = ax2.transAxes)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;sns_pairplot_iris&#39;</span><span class="p">,</span> <span class="n">dpi</span> <span class="o">=</span> <span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>pip install <span class="nv">plotly_express</span><span class="o">==</span><span class="m">0</span>.4.0 
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
+<span class="c1"># Use directly Columns as argument. You can use tab completion for this!</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">iris</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">iris</span><span class="o">.</span><span class="n">sepal_length</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">iris</span><span class="o">.</span><span class="n">sepal_width</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">iris</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">iris</span><span class="o">.</span><span class="n">petal_length</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<hr>
+&copy; 2020 cgpu
+<p><small>Exported from <a href="https://github.com/cgpu/ipynb-research-website/blob/2b64e9bc9931c891cfff3472d797e1ae2f365542/analysis/1-eda-with-pandas.ipynb"><code>analysis/1-eda-with-pandas.ipynb</code></a> committed by cgpu on Tue Apr 14 23:44:34 2020 <a href="https://github.com/cgpu/ipynb-research-website/commit/2b64e9bc9931c891cfff3472d797e1ae2f365542">revision 1, 2b64e9b</a> <a href="https://stephenslab.github.io/ipynb-website/notes.html#Note-about-commit-ids"><span class="fa fa-question-circle"></span></a></small></p>
+</div>
+</div>
+</body>
+</html>

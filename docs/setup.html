@@ -4,8 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="ipynb_website:version" content="0.9.7" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-<title>Divvy data exploration project</title>
+<title>Introduction to literate programming with Jupyter Notebooks</title>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 <link href="site_libs/bootstrap-3.3.5/css/readable.min.css" rel="stylesheet" />
@@ -13,12 +12,10 @@
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
-
 <style type="text/css">code{white-space: pre;}</style>
 <link rel="stylesheet"
       href="site_libs/highlightjs/null.min.css"
       type="text/css" />
-
 <script src="site_libs/highlightjs/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 <script type="text/javascript">
@@ -62,9 +59,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
         }
     });
 </script>
-
 </head>
-
 <body>
 <style type = "text/css">
 @font-face {
@@ -85,24 +80,19 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
  font-style: normal;
  src: local('PT Mono'), url('fonts/ptmono.ttf') format('truetype');
 }
-
 body {
-  
   font-size: 160%;
   padding-top: 66px;
   padding-bottom: 40px;
 }
-
 h1, h2, h3, h4, h5, h6 {
   margin-top: 20px;
  }
-
 a.anchor-link:link {
   text-decoration: none;
   padding: 0px 20px;
   visibility: hidden;
 }
-
 h1:hover .anchor-link,
 h2:hover .anchor-link,
 h3:hover .anchor-link,
@@ -111,7 +101,6 @@ h5:hover .anchor-link,
 h6:hover .anchor-link {
   visibility: hidden;
 }
-
 .main-container {
   max-width: 940px;
   margin-left: auto;
@@ -132,7 +121,6 @@ button.code-folding-btn:focus {
   outline: none;
 }
 </style>
-
 <script>
 // manage active state of menu based on current page
 $(document).ready(function () {
@@ -142,17 +130,13 @@ $(document).ready(function () {
   if (href === "")
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
-
   // mark it active
   menuAnchor.parent().addClass('active');
-
   // if it's got a parent navbar menu mark it active as well
   menuAnchor.closest('li.dropdown').addClass('active');
 });
 </script>
-
 <div class="container-fluid main-container">
-
 <!-- tabsets -->
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script>
@@ -160,9 +144,7 @@ $(document).ready(function () {
   window.buildTabsets("TOC");
 });
 </script>
-
 <!-- code folding -->
-
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -171,283 +153,149 @@ $(document).ready(function () {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">Divvy data exploration project</a>
+      <a class="navbar-brand" href="index.html">Introduction to literate programming with Jupyter Notebooks</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        
 <li>
   <a href="./index.html">Overview</a>
 </li>
-        
 <li>
   <a href="./setup.html">Setup</a>
 </li>
-        
 <li>
   <a href="./license.html">License</a>
 </li>
-        
 <li>
   <a href="./notes.html">Notes</a>
 </li>
-        
 <li>
   <a href="./protected.html">Protected</a>
 </li>
-        
       </ul>
-    
 <ul class="nav navbar-nav navbar-right">
 <li>
-   <a href="http://github.com/stephenslab/ipynb-website"> source </a>
+   <a href="https://github.com/cgpu/ipynb-research-website"> source </a>
 </li>
 </ul>
-        
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Setup-for-Divvy-data-analysis">Setup for Divvy data analysis<a class="anchor-link" href="#Setup-for-Divvy-data-analysis">&#182;</a></h1><p><strong>authors:</strong> Peter Carbonetto, Gao Wang<br>
-<strong>date:</strong> July 13, 2017</p>
-<p>To reproduce the results on your own computer, please follow these setup instructions.</p>
-
+<h1 id="Set-up-for-the-tutorial">Set up for the tutorial<a class="anchor-link" href="#Set-up-for-the-tutorial">&#182;</a></h1>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Setup-instructions">Setup instructions<a class="anchor-link" href="#Setup-instructions">&#182;</a></h2><ul>
-<li>Download or clone the <a href="https://github.com/stephenslab/ipynb-website">ipynb-website git repository</a> on your computer.</li>
-</ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<ul>
-<li>Download the Divvy data files and copy the files to the "data" directory. We have provided a script <code>code/retrieve_divvy_data.sh</code> that will automatically retrieve the data files and move them to the expected location. Alternatively, you can view this script and follow the steps by hand. After completing this step, these files should be in the data directory:</li>
-</ul>
-
-<pre><code>Divvy_Stations_2016_Q1Q2.csv
-Divvy_Stations_2016_Q3.csv
-Divvy_Stations_2016_Q4.csv
-Divvy_Trips_2016_04.csv
-Divvy_Trips_2016_05.csv
-Divvy_Trips_2016_06.csv
-Divvy_Trips_2016_Q1.csv
-Divvy_Trips_2016_Q3.csv
-Divvy_Trips_2016_Q4.csv</code></pre>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<ul>
-<li>Install <a href="http://cran.r-project.org">R</a>.</li>
-</ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<ul>
-<li>Optionally, install <a href="http://jupyter.org">Jupyter</a>. The recommended way to do this is to download and install <a href="https://www.continuum.io/anaconda-overview">Anaconda</a>. This is only needed if you would like to run the code interactively within the Jupyter notebooks.</li>
-</ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<ul>
-<li>If you are using Jupyter, download and install the <a href="https://irkernel.github.io">Jupyter R kernel</a>.</li>
-</ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<ul>
-<li>Install the R packages used for the analyses:</li>
-</ul>
-
-<pre><code>install.packages(c("repr","data.table","ggplot2"))</code></pre>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Once you have completed these steps, you are ready to run the R code. There are several ways this can be done.</p>
-<p>One simple way is to run the individual code chunks by copying and pasting into the R console. When
-running the code in this way, make sure your working directory is set to the "analysis" directory, e.g.,</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-r"><pre><span></span><span class="kp">setwd</span><span class="p">(</span><span class="s">&quot;../analysis&quot;</span><span class="p">)</span>
-<span class="kp">getwd</span><span class="p">()</span>
+<h2 id="1.-Start-a-new-Jupyter-Lab-session-in-CloudOS">1. Start a new Jupyter Lab session in CloudOS<a class="anchor-link" href="#1.-Start-a-new-Jupyter-Lab-session-in-CloudOS">&#182;</a></h2><p>For detailed instructions on how to access the Jupyter Notebook Sessions in Lifebit CloudOS, take a look at the documentation here:
+<a href="https://lifebit.gitbook.io/cloudos/web-interface/jupyter-lab">https://lifebit.gitbook.io/cloudos/web-interface/jupyter-lab</a></p>
+<p>Follow the instructions on <a href="https://lifebit.gitbook.io/cloudos/web-interface/jupyter-lab#how-can-i-create-a-new-notebook-sessions-on-cloudos">"How to create a Jupyter Notebook Session in CloudOS"</a>. For this step of the analysis, start a small sized instance. 4vCPUS instances for example are sufficient for exploratory data analysis tasks with small datasets.</p>
+<h2 id="2.-Prepare-your-environment-for-using-conda">2. Prepare your environment for using <code>conda</code><a class="anchor-link" href="#2.-Prepare-your-environment-for-using-conda">&#182;</a></h2><p>After your Notebook Session has initilased in CloudOS, open a terminal using the + icon, and type the following command to initialize conda for shell interaction:</p>
+<div class="highlight"><pre><span></span>conda init
 </pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-
-<div class="output_html rendered_html output_subarea ">
-'/Users/pcarbo/git/ipynb-website/analysis'
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Alternatively, you can open the notebooks in Jupyter and run the code interactively.</p>
-
+<p>Close the terminal and open a new one so that the changes take effect.</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Session-information">Session information<a class="anchor-link" href="#Session-information">&#182;</a></h2><p>This is the version of Jupyter that was used to generate the results from the notebooks.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-r"><pre><span></span><span class="kp">system</span><span class="p">(</span><span class="s">&quot;jupyter --version&quot;</span><span class="p">,</span>intern <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+<h2 id="3.-Clone-the-tutorial's-GitHub-repo-in-the-Jupyter-Notebook-Session">3. Clone the tutorial's GitHub repo in the Jupyter Notebook Session<a class="anchor-link" href="#3.-Clone-the-tutorial's-GitHub-repo-in-the-Jupyter-Notebook-Session">&#182;</a></h2><p>To bring the code from GitHub to CloudOS, we will use the <code>git clone</code> command. Follow the steps below to:</p>
+<p>a) configure your Git credentials in the Jupyter Notebook Session
+b) clone the repository in your working directory in the Jupyter Notebook Session</p>
+<blockquote><p><strong>NOTE</strong>:
+If you have 2 Factor Authentication enabled in your GitHub account, make sure you have handy your personal access token. If not, you can use your GitHub password on login.
+If you want to create a Personal Access Token (PAT) with sensible defaults, an easy way is to call the <code>browse_github_pat()</code> function from the R package <code>{usethis}</code>.</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="c1"># https://usethis.r-lib.org/reference/browse_github_pat.html</span>
+<span class="n">usethis</span><span class="o">::</span><span class="nf">browse_github_pat</span><span class="p">()</span>
 </pre></div>
-
-    </div>
+<p>This command will take you to the following webpage:
+<a href="https://github.com/settings/tokens/new?scopes=repo,gist,user:email&amp;description=R:GITHUB_PAT">https://github.com/settings/tokens/new?scopes=repo,gist,user:email&amp;description=R:GITHUB_PAT</a></p>
+<p>You can see in the URL the default scopes. Follow the instructions in your GitHub account to complete the creation of the Personal Acces Token.</p>
 </div>
 </div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-
-<div class="output_html rendered_html output_subarea ">
-'4.3.0'
-</div>
-
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This is the version of R and the packages that were used to generate the results from the Jupyter notebooks.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-r"><pre><span></span>sessionInfo<span class="p">()</span>
+<h2 id="3a)-Configure-your-Git-credentials-in-the-Jupyter-Notebook-Session">3a) Configure your Git credentials in the Jupyter Notebook Session<a class="anchor-link" href="#3a)-Configure-your-Git-credentials-in-the-Jupyter-Notebook-Session">&#182;</a></h2><p>Next, let's set up our Git credentials in the Jupyter Notebooks Session to be able to perfom git commands, like <code>git push</code>, <code>git pull</code>, <code>git add</code> etc.</p>
+<p>To configure your <code>user.name</code>, <code>user.email</code> and favorite text editor execute the following commands.
+Replace the example <code>user.name</code> and <code>user.email</code> with your respective information that you have associated with your GitHub account.</p>
+<div class="highlight"><pre><span></span><span class="c1"># Set user name and email</span>
+git config --global user.name 
+git config --global user.email 
+<span class="c1"># Set your prefered editor</span>
+git config --global core.editor nano
 </pre></div>
-
-    </div>
+<p>You can swap <code>nano</code>, for <code>vi</code>, <code>vim</code> or <code>emacs</code>.</p>
 </div>
 </div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-
-
-<div class="output_text output_subarea ">
-<pre>R version 3.3.2 (2016-10-31)
-Platform: x86_64-apple-darwin13.4.0 (64-bit)
-Running under: macOS Sierra 10.12.5
-
-locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-
-attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
-
-loaded via a namespace (and not attached):
- [1] R6_2.2.0        magrittr_1.5    IRdisplay_0.4.4 pbdZMQ_0.2-5   
- [5] tools_3.3.2     crayon_1.3.2    uuid_0.1-2      stringi_1.1.2  
- [9] IRkernel_0.7    jsonlite_1.5    stringr_1.2.0   digest_0.6.12  
-[13] repr_0.12.0     evaluate_0.10.1</pre>
 </div>
-
-</div>
-
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="3b)-Clone-the-repository-in-your-working-directory-in-the-Jupyter-Notebook-Session">3b) Clone the repository in your working directory in the Jupyter Notebook Session<a class="anchor-link" href="#3b)-Clone-the-repository-in-your-working-directory-in-the-Jupyter-Notebook-Session">&#182;</a></h2><p>The default working directory in the CloudOS Jupyter Notebooks Session is named <code>session_data</code>. Go ahead and clone the repo in the <code>session_data</code> directory by typing the following command in your terminal:</p>
+<div class="highlight"><pre><span></span>git clone https://github.com/cgpu/ipynb-research-website
+</pre></div>
 </div>
 </div>
-
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Then, <code>cd</code> into the <code>ipynb-research-website</code> directory</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="4.-Update-the-base-conda-environment">4. Update the <code>base</code> conda environment<a class="anchor-link" href="#4.-Update-the-base-conda-environment">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Use the dependencies metadata file named <code>environment.yml</code> to install the required dependencies for the turorial.</p>
+<blockquote><p><strong>NOTE</strong>:
+You can read more about installing dependencies with conda from metadata files in the official documentation <a href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file">here</a>.</p>
+</blockquote>
+<p>To install the required dependencies, type the following commands:</p>
+<div class="highlight"><pre><span></span>conda env update --name base --file dependencies/environment.yml -y
+conda activate base
+</pre></div>
+<p><em>TIP:</em></p>
+<p>During the tutorial, we might install more R packages. In the end of our Jupyter Notebook Session, we can export the <em>updated</em> environment metadata in a file (it is typical to name this <code>environment.yml</code>) and use it to reproduce the same workspace in the future or share it with someone that wants to test the same tutorial.</p>
+<p>A handy command to export conda dependencies installed during the session in <a href="https://github.com/conda/conda/issues/9399">an OS agnostic manner</a> is the following:</p>
+<div class="highlight"><pre><span></span>conda env <span class="nb">export</span> --no-builds --from-history  <span class="p">|</span> grep -v <span class="s2">&quot;^prefix: &quot;</span> &gt; environment.yml
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="5.-Ready!">5. Ready!<a class="anchor-link" href="#5.-Ready!">&#182;</a></h1><p>Once conda has successfully installed the dependencies, your environment is ready.
+We can now start working on our Jupyter Notebook Sessions!</p>
+</div>
+</div>
 </div>
 <hr>
-&copy; 2017 Peter Carbonetto &amp; Gao Wang
+&copy; 2020 cgpu
 <!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
-
 </div>
-
 <script>
 // add bootstrap table styles to pandoc tables
 $(document).ready(function () {
   $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
 });
 </script>
-
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
   (function () {

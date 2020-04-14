@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="ipynb_website:version" content="0.9.7" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="../css/jt.css">
+<link rel="stylesheet" type="text/css" href="../css/readable.css">
+<link rel="stylesheet" type="text/css" href="../css/toc2.css">
+<link href="../site_libs/jqueryui-1.11.4/jquery-ui.css">
+<link rel="stylesheet" href="../site_libs/bootstrap-3.3.5/css/readable.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="../site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<link rel="stylesheet"
+      href="../site_libs/highlightjs/null.min.css"
+      type="text/css" />
+<script src="../site_libs/highlightjs/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+<script src="../js/doc_toc.js"></script>
+<script src="../js/docs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script>
+    MathJax.Hub.Config({
+        extensions: ["tex2jax.js"],
+        jax: ["input/TeX", "output/HTML-CSS"],
+        tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true
+        },
+        "HTML-CSS": {
+            preferredFont: "TeX",
+            availableFonts: ["TeX"],
+            styles: {
+                scale: 110,
+                ".MathJax_Display": {
+                    "font-size": "110%",
+                }
+            }
+        }
+    });
+</script>
+<script>
+function filterDataFrame(id) {
+    var input = document.getElementById("search_" + id);
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById("dataframe_" + id);
+    var tr = table.getElementsByTagName("tr");
+    // Loop through all table rows, and hide those who don't match the search query
+    for (var i = 1; i < tr.length; i++) {
+        for (var j = 0; j < tr[i].cells.length; ++j) {
+            var matched = false;
+            if (tr[i].cells[j].innerHTML.toUpperCase().indexOf(filter) != -1) {
+                tr[i].style.display = "";
+                matched = true
+                break;
+            }
+            if (!matched)
+                tr[i].style.display = "none";
+        }
+    }
+}
+function sortDataFrame(id, n, dtype) {
+    var table = document.getElementById("dataframe_" + id);
+    var tb = table.tBodies[0]; // use `<tbody>` to ignore `<thead>` and `<tfoot>` rows
+    var tr = Array.prototype.slice.call(tb.rows, 0); // put rows into array
+    if (dtype === 'numeric') {
+        var fn = function(a, b) { 
+            return parseFloat(a.cells[n].textContent) <= parseFloat(b.cells[n].textContent) ? -1 : 1;
+        }
+    } else {
+        var fn = function(a, b) {
+            var c = a.cells[n].textContent.trim().localeCompare(b.cells[n].textContent.trim()); 
+            return c > 0 ? 1 : (c < 0 ? -1 : 0) }
+    }
+    var isSorted = function(array, fn) {
+        if (array.length < 2)
+            return 1;
+        var direction = fn(array[0], array[1]); 
+        for (var i = 1; i < array.length - 1; ++i) {
+            var d = fn(array[i], array[i+1]);
+            if (d == 0)
+                continue;
+            else if (direction == 0)
+                direction = d;
+            else if (direction != d)
+                return 0;
+            }
+        return direction;
+    }
+    var sorted = isSorted(tr, fn);
+    if (sorted == 1 || sorted == -1) {
+        // if sorted already, reverse it
+        for(var i = tr.length - 1; i >= 0; --i)
+            tb.appendChild(tr[i]); // append each row in order
+    } else {
+        tr = tr.sort(fn);
+        for(var i = 0; i < tr.length; ++i)
+            tb.appendChild(tr[i]); // append each row in order
+    }
+}
+</script>
+<script>
+$( document ).ready(function(){
+            var cfg={'threshold':3,     // depth of toc (number of levels)
+             'number_sections': false,
+             'toc_cell': false,          // useless here
+             'toc_window_display': true, // display the toc window
+             "toc_section_display": "block", // display toc contents in the window
+             'sideBar':true,       // sidebar or floating window
+             'navigate_menu':false       // navigation menu (only in liveNotebook -- do not change)
+            }
+            var st={};                  // some variables used in the script
+            st.rendering_toc_cell = false;
+            st.config_loaded = false;
+            st.extension_initialized=false;
+            st.nbcontainer_marginleft = $('#notebook-container').css('margin-left')
+            st.nbcontainer_marginright = $('#notebook-container').css('margin-right')
+            st.nbcontainer_width = $('#notebook-container').css('width')
+            st.oldTocHeight = undefined
+            st.cell_toc = undefined;
+            st.toc_index=0;
+            // fire the main function with these parameters
+            table_of_contents(cfg, st);
+            var file=analysisDict[$("h1:first").attr("id")];
+            $("#toc-level0 a").css("color","#126dce");
+            $('a[href="#'+$("h1:first").attr("id")+'"]').hide()
+            var docs=analysisArray;
+            var docs_map=analysisArrayMap;
+            var pos=analysisArray.indexOf(file);
+            for (var a=pos;a>=0;a--){
+                  $('<li><a href="'+docs[a]+'.html"><font color="#073642"><b>'+docs_map[docs[a]].replace(/_/g," ")+'</b></font></a></li>').insertBefore("#toc-level0 li:eq(0)");
+            }
+            $('a[href="'+file+'.html'+'"]').css("color","#126dce");
+            for (var a=pos+1;a<docs.length;a++){
+                  $(".toc #toc-level0").append('<li><a href="'+docs[a]+'.html"><font color="#073642"><b>'+docs_map[docs[a]].replace(/_/g," ")+'</b></font></a></li>');
+            }
+            // $("#toc-header").hide(); // comment out because it prevents search bar from displaying
+    });
+</script>
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+  // mark it active
+  menuAnchor.parent().addClass('active');
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+<div class="container-fluid main-container">
+<!-- tabsets -->
+<script src="../site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+<title>Introduction to literate programming with Jupyter Notebooks</title>
+<style type = "text/css">
+body {
+  padding-top: 66px;
+  padding-bottom: 40px;
+}
+</style>
+</head>
+<body>
+<div tabindex="-1" id="notebook" class="border-box-sizing">
+<div class="container" id="notebook-container">
+<!-- code folding -->
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../index.html">Introduction to literate programming with Jupyter Notebooks</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+<li>
+  <a href="../index.html">Overview</a>
+</li>
+<li>
+  <a href="../setup.html">Setup</a>
+</li>
+<li>
+  <a href="../license.html">License</a>
+</li>
+<li>
+  <a href="../notes.html">Notes</a>
+</li>
+<li>
+  <a href="../protected.html">Protected</a>
+</li>
+      </ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+   <a href="https://github.com/cgpu/ipynb-research-website"> source </a>
+</li>
+</ul>
+      </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Plotting-in-R-with-ggplot2-and-friends">Plotting in R with <code>ggplot2</code> and friends<a class="anchor-link" href="#Plotting-in-R-with-ggplot2-and-friends">&#182;</a></h1><p><strong>email</strong>: christina@lifebit.ai</p>
+<p>(or create a new issue in the workshop's github repo <a href="https://github.com/lifebit-ai/jax-jupyter/issues">here</a>)</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Loading-libraries-and-installing-dependencies:">Loading libraries and installing dependencies:<a class="anchor-link" href="#Loading-libraries-and-installing-dependencies:">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;ggpubr&quot;</span><span class="p">)</span>
+<span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;githubinstall&quot;</span><span class="p">)</span>
+<span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;DT&quot;</span><span class="p">)</span>
+<span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;skimr&quot;</span><span class="p">)</span>
+<span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;BiocManager&quot;</span><span class="p">)</span>
+<span class="n">BiocManager</span><span class="o">::</span><span class="nf">install</span><span class="p">(</span><span class="s">&quot;EnhancedVolcano&quot;</span><span class="p">)</span>
+<span class="c1">#BiocManager::install(&quot;DESeq2&quot;)</span>
+<span class="c1">#BiocManager::install(&quot;airway&quot;)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">ggplot2</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">ggpubr</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">githubinstall</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">DT</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">skimr</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">BiocManager</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">EnhancedVolcano</span><span class="p">)</span>
+<span class="c1">#library(airway)</span>
+<span class="c1">#library(DESeq2)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Searching-for-packages-relevant-to-ggplot2">Searching for packages relevant to <code>ggplot2</code><a class="anchor-link" href="#Searching-for-packages-relevant-to-ggplot2">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The following brief tutorial will guide you through the functions of the <code>githubinstall</code> R package, a package to easily query GitHub and find all relevant R packages to your selected query search term of interest. The function <code>gh_search_packages()</code> returns the list of R packages on GitHub that the titles contains a given <code>#keyword</code> .</p>
+<p>For example, if you want to search packages that are relevant to <strong>"ggplot2"</strong>, run the following:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1">#  Search Packages by a Keyword, in this example we search for &quot;ggplot2&quot; </span>
+<span class="c1"># install.packages(&quot;githubinstall&quot;) || found here: hoxo-m.github.io/githubinstall/</span>
+<span class="n">keyword</span> <span class="o">&lt;-</span> <span class="s">&quot;ggplot2&quot;</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">githubinstall</span><span class="p">)</span>
+<span class="n">pckges</span>    <span class="o">&lt;-</span> <span class="nf">gh_search_packages</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span>
+<span class="n">skimr</span><span class="o">::</span><span class="nf">skim</span><span class="p">(</span><span class="n">pckges</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Let's-inspect-what-packages-we-retrieved-related-to-ggplot2">Let's inspect what packages we retrieved related to <code>ggplot2</code><a class="anchor-link" href="#Let's-inspect-what-packages-we-retrieved-related-to-ggplot2">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="n">DT</span><span class="o">::</span><span class="nf">datatable</span><span class="p">(</span><span class="n">pckges</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Above we can see how many packages were found that contain the search term in their description. The <code>gh_search_packages</code> function returns 3 arguments for each package:<br></p>
+<ul>
+<li><code>username:</code>account name of package developer on GitHub</li>
+<li><code>package_name:</code>the name of the package that you can use as argument in thw <code>install.packages()</code> function</li>
+<li><code>title:</code> the description of the package</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="&#129300;-Mmm,-wouldn't-it-be-nice-if-the-package-name-was-actually-a-&lt;clickable&gt;--link..">&#129300; Mmm, wouldn't it be nice if the package name was actually a <code>&lt;clickable&gt;</code>  link..<a class="anchor-link" href="#&#129300;-Mmm,-wouldn't-it-be-nice-if-the-package-name-was-actually-a-&lt;clickable&gt;--link..">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's try to add some interactivity to our retrieved table and convert the package names to clickable links that will take us to the github repo of the packages.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Reconstructing-the-R-package-GitHub-repo-url-for-clickable-links">Reconstructing the R package GitHub repo url for clickable links<a class="anchor-link" href="#Reconstructing-the-R-package-GitHub-repo-url-for-clickable-links">&#182;</a></h3><p>We will recontruct the string with the above pattern for all found packages, and add the html tag for redirecting
+so the pattern to recreate should look like this:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1"># Mutate the package names to create clickable links:</span>
+<span class="n">pckges</span><span class="o">$</span><span class="n">package_name</span> <span class="o">&lt;-</span> <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;&lt;a href=&#39;https://github.com/&quot;</span><span class="p">,</span>
+                             <span class="n">pckges</span><span class="o">$</span><span class="n">username</span><span class="p">,</span> 
+                             <span class="s">&quot;/&quot;</span><span class="p">,</span>
+                             <span class="n">pckges</span><span class="o">$</span><span class="n">package_name</span><span class="p">,</span> 
+                             <span class="s">&quot;&#39;/&quot;</span><span class="p">,</span>
+                             <span class="s">&quot;target=&#39;blank&quot;</span><span class="p">,</span>
+                             <span class="s">&quot;&#39;&gt;&quot;</span><span class="p">,</span>
+                             <span class="n">pckges</span><span class="o">$</span><span class="n">package_name</span><span class="p">,</span> 
+                             <span class="s">&quot;&lt;/a&gt;&quot;</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Updated-datatable-with-clickable-links!">Updated datatable with clickable links!<a class="anchor-link" href="#Updated-datatable-with-clickable-links!">&#182;</a></h2><p>Now we can inspect the packages that seem interesting by clicking the link. This will take us to the respective repository in GitHub.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="n">DT</span><span class="o">::</span><span class="nf">datatable</span><span class="p">(</span><span class="n">pckges</span><span class="p">[,</span><span class="m">-1</span><span class="p">],</span>      <span class="c1"># the -1 to omit the username in the output table</span>
+              <span class="n">escape</span> <span class="o">=</span> <span class="kc">FALSE</span>   <span class="c1"># this is required for the url</span>
+             <span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Let's-search-for-ggpubr-R-package-in-our-data-table-above-&#128070;">Let's search for <code>ggpubr</code> R package in our data table above &#128070;<a class="anchor-link" href="#Let's-search-for-ggpubr-R-package-in-our-data-table-above-&#128070;">&#182;</a></h1><p><br></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="../img/ggpubr.png" alt=""></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is one of our favorite R packages to create beautiful publication-ready plots. Before starting we will need to get some data.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Getting-RNAseq-data-to-test-our-plots">Getting RNAseq data to test our plots<a class="anchor-link" href="#Getting-RNAseq-data-to-test-our-plots">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We will utilise the  data from from <a href="http://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html">Bioconductor's Rnaseq Workflow</a>. We will see this dataset again a little later from another R package  for plotting. For retrieving the results of the differential expression analysis, we will follow the tutorial (from Section 3.1) of the RNA-seq workflow. Specifically, we will load the <a href="https://bioconductor.org/packages/release/data/experiment/html/airway.html">airway</a> data, where different airway smooth muscle cells were treated with dexamethasone. We will use this dataset to explore different visualisations for presenting differential abundance. While the data we will use are from an RNAseq experiment, we can utilise the same visualisations for other omics data such as proteomics or metabolomics after the relevant preprocessing.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Loading-and-inspecting-the-{airway}-differential-analysis-results">Loading and inspecting the <code>{airway}</code> differential analysis results<a class="anchor-link" href="#Loading-and-inspecting-the-{airway}-differential-analysis-results">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To save some waiting time we will load the precomputed results from the comparison described above, our set contrast for treated and untreated with dexamethasone muscle cells. You can reproduce this table by running the following code:</p>
+<div class="highlight"><pre><span></span><span class="c1"># this code snippet is written in markdown, enclosed in ``` and will not be executed</span>
+<span class="c1"># to run paste in a code cell</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">magrittr</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="s">&#39;DESeq2&#39;</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">airway</span><span class="p">)</span>
+<span class="nf">data</span><span class="p">(</span><span class="s">&#39;airway&#39;</span><span class="p">)</span>
+<span class="nf">levels</span><span class="p">(</span><span class="n">airway</span><span class="o">$</span><span class="n">dex</span><span class="p">)</span>
+<span class="n">airway</span><span class="o">$</span><span class="n">dex</span> <span class="o">%&lt;&gt;%</span> <span class="nf">relevel</span><span class="p">(</span><span class="s">&#39;untrt&#39;</span><span class="p">)</span>
+<span class="nf">levels</span><span class="p">(</span><span class="n">airway</span><span class="o">$</span><span class="n">dex</span><span class="p">)</span>
+<span class="n">dds</span> <span class="o">&lt;-</span> <span class="nf">DESeqDataSet</span><span class="p">(</span><span class="n">airway</span><span class="p">,</span> <span class="n">design</span> <span class="o">=</span> <span class="o">~</span> <span class="n">cell</span> <span class="o">+</span> <span class="n">dex</span><span class="p">)</span>
+<span class="n">dds</span> <span class="o">&lt;-</span> <span class="nf">DESeq</span><span class="p">(</span><span class="n">dds</span><span class="p">,</span> <span class="n">betaPrior</span><span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span>
+<span class="n">res1</span> <span class="o">&lt;-</span> <span class="nf">results</span><span class="p">(</span><span class="n">dds</span><span class="p">,</span><span class="n">contrast</span> <span class="o">=</span> <span class="nf">c</span><span class="p">(</span><span class="s">&#39;dex&#39;</span><span class="p">,</span><span class="s">&#39;trt&#39;</span><span class="p">,</span><span class="s">&#39;untrt&#39;</span><span class="p">))</span>
+<span class="n">subsampled_results</span> <span class="o">&lt;-</span> <span class="n">res1</span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">5000</span><span class="p">,]</span>
+<span class="n">subsampled_results</span><span class="o">$</span><span class="n">feature</span> <span class="o">&lt;-</span> <span class="n">subsampled_results</span><span class="o">@</span><span class="n">rownames</span>
+<span class="c1"># Subsample and save an object to an Rds and a csv file</span>
+<span class="nf">saveRDS</span><span class="p">(</span><span class="n">subsample_results</span><span class="p">,</span> <span class="n">file</span> <span class="o">=</span> <span class="s">&quot;deseq2_5k.rds&quot;</span><span class="p">)</span>
+<span class="n">loaded_results_RDS</span> <span class="o">&lt;-</span> <span class="nf">readRDS</span><span class="p">(</span><span class="n">file</span> <span class="o">=</span> <span class="s">&quot;deseq2_5k.rds&quot;</span><span class="p">)</span>
+<span class="n">data.table</span><span class="o">::</span><span class="nf">fwrite</span><span class="p">(</span><span class="nf">as.data.frame</span><span class="p">(</span><span class="n">subsampled_results</span><span class="p">),</span>
+                   <span class="n">col.names</span> <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span> 
+                   <span class="n">row.names</span> <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span>
+                   <span class="n">file</span> <span class="o">=</span> <span class="s">&quot;../data/2-plotting-in-R/deseq2_5k.csv&quot;</span><span class="p">,</span> 
+                   <span class="n">sep</span>  <span class="o">=</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="n">results</span> <span class="o">&lt;-</span> <span class="n">data.table</span><span class="o">::</span><span class="nf">fread</span><span class="p">(</span><span class="n">file</span> <span class="o">=</span> <span class="s">&quot;../data/2-plotting-in-R/deseq2_5k.csv&quot;</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Let's-inspect-the-results">Let's inspect the results<a class="anchor-link" href="#Let's-inspect-the-results">&#182;</a></h1><p>We quickly notice the log2FoldChange and adjusted pValue. In a differential expression experiment, these two metrics give us a quick overview of the most interesting biological</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="nf">head</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Easy-volcano-plots-with-{EnhancedVolcano}-R-package-&#128230;">Easy volcano plots with <code>{EnhancedVolcano}</code> R package &#128230;<a class="anchor-link" href="#Easy-volcano-plots-with-{EnhancedVolcano}-R-package-&#128230;">&#182;</a></h1><p>The <code>{EnhancedVolcano}</code> R package 📦 has been developed by <a href="https://www.biostars.org/u/41557/">Kevin Blighe</a> - the name might seem familiar as you might have come across it several times if you find yourselves in <a href="https://www.biostars.org/u/41557/">Biostars</a> frequently. Kevin Blighe, is not merely a very active Biostars users but also the admin! The <code>{EnhancedVolcano}</code> R package, is one very useful R package, as it provides great flexibility and ease for creating publication ready Volcano plots. We will be following the package <code>vignette</code>, which can be found <a href="https://github.com/kevinblighe/EnhancedVolcano">here</a>, in the respective GitHub repository.Let's see the package in action!</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">EnhancedVolcano</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1"># A minimal function call, for a complete plot</span>
+<span class="n">gg</span><span class="o">&lt;-</span> <span class="nf">EnhancedVolcano</span><span class="p">(</span><span class="n">toptable</span> <span class="o">=</span> <span class="n">results</span><span class="p">,</span> 
+                    <span class="n">lab</span> <span class="o">=</span> <span class="n">results</span><span class="o">$</span><span class="n">feature</span><span class="p">,</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="s">&#39;log2FoldChange&#39;</span><span class="p">,</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="s">&#39;pvalue&#39;</span><span class="p">,</span>
+                    <span class="n">xlim</span> <span class="o">=</span> <span class="nf">c</span><span class="p">(</span><span class="m">-5</span><span class="p">,</span> <span class="m">8</span><span class="p">))</span>
+<span class="n">gg</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&#39;plotly&#39;</span><span class="p">)</span> <span class="p">;</span> <span class="nf">library</span><span class="p">(</span><span class="n">plotly</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Let's-customise-the-&#127755;-plot-a-bit-more">Let's customise the &#127755; plot a bit more<a class="anchor-link" href="#Let's-customise-the-&#127755;-plot-a-bit-more">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<ul>
+<li>Modify cut-offs for log2FC and P value</li>
+<li>specify title </li>
+<li>adjust point and label size</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="n">gg</span><span class="o">&lt;-</span>   <span class="n">EnhancedVolcano</span><span class="o">::</span><span class="nf">EnhancedVolcano</span><span class="p">(</span> <span class="n">results</span><span class="p">,</span>    
+                        <span class="n">col</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">&#39;grey&#39;</span><span class="p">,</span> <span class="s">&#39;grey&#39;</span><span class="p">,</span> <span class="s">&#39;orange&#39;</span><span class="p">,</span> <span class="s">&#39;forestgreen&#39;</span><span class="p">),</span>
+                        <span class="n">lab</span> <span class="o">=</span> <span class="n">results</span><span class="o">$</span><span class="n">feature</span><span class="p">,</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="s">&#39;log2FoldChange&#39;</span><span class="p">,</span>
+                        <span class="n">y</span> <span class="o">=</span> <span class="s">&#39;pvalue&#39;</span><span class="p">,</span>
+                        <span class="n">xlim</span> <span class="o">=</span> <span class="nf">c</span><span class="p">(</span><span class="m">-6</span><span class="p">,</span> <span class="m">6</span><span class="p">),</span>
+                        <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Differential abundance (untreated with respect to treated cells)&#39;</span><span class="p">,</span>  
+                        <span class="n">titleLabSize</span> <span class="o">=</span> <span class="m">12</span><span class="p">,</span>
+                        <span class="n">subtitle</span> <span class="o">=</span> <span class="s">&#39;{EnhancedVolcano} for JAX&#39;</span><span class="p">,</span>
+                        <span class="n">subtitleLabSize</span> <span class="o">=</span> <span class="m">10</span><span class="p">,</span>
+                        <span class="n">caption</span> <span class="o">=</span> <span class="s">&quot;Treated vs Untreated with dexamethasone&quot;</span><span class="p">,</span>
+                        <span class="n">captionLabSize</span> <span class="o">=</span> <span class="m">10</span><span class="p">,</span>
+                        <span class="n">pCutoff</span> <span class="o">=</span> <span class="m">10e-16</span><span class="p">,</span>
+                        <span class="n">FCcutoff</span> <span class="o">=</span> <span class="m">1.2</span><span class="p">,</span>
+                        <span class="n">pointSize</span> <span class="o">=</span> <span class="m">1.0</span><span class="p">,</span>
+                        <span class="n">labSize</span> <span class="o">=</span> <span class="m">3.0</span><span class="p">)</span>
+<span class="n">gg</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="&#160;PCA-plotting-with-ggfortify::autoplot()">&#160;PCA plotting with <code>ggfortify::autoplot()</code><a class="anchor-link" href="#&#160;PCA-plotting-with-ggfortify::autoplot()">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;ggfortify&quot;</span><span class="p">)</span>
+<span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;htmlwidgets&quot;</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">ggfortify</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">&lt;-</span> <span class="n">iris</span><span class="p">[</span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">)]</span> <span class="c1"># omitting categorical variable</span>
+<span class="nf">autoplot</span><span class="p">(</span><span class="nf">prcomp</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Add-color-coding-based-on-Species">Add color coding based on Species<a class="anchor-link" href="#Add-color-coding-based-on-Species">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="n">gg</span><span class="o">&lt;-</span> <span class="nf">autoplot</span><span class="p">(</span><span class="nf">prcomp</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">data</span> <span class="o">=</span> <span class="n">iris</span><span class="p">,</span> <span class="n">colour</span> <span class="o">=</span> <span class="s">&#39;Species&#39;</span><span class="p">)</span>
+<span class="n">gg</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Add-title">Add title<a class="anchor-link" href="#Add-title">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="n">gg</span> <span class="o">&lt;-</span> <span class="n">gg</span> <span class="o">+</span> <span class="nf">labs</span><span class="p">(</span><span class="n">title</span>      <span class="o">=</span> <span class="s">&quot;Visual exploratory analysis of the iris dataset&quot;</span><span class="p">,</span>
+                <span class="n">subtitle</span>   <span class="o">=</span> <span class="s">&quot;Iris dataset PCA plot&quot;</span><span class="p">,</span>
+                <span class="n">caption</span>    <span class="o">=</span> <span class="s">&quot;Interactive plotting with ggplot2 and friends&quot;</span><span class="p">)</span>   
+<span class="n">gg</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Customize-the-font-size-of-the-added-labels">Customize the font size of the added labels<a class="anchor-link" href="#Customize-the-font-size-of-the-added-labels">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1"># Controlling font face, font colour and font size of labs. Also centering with hjust </span>
+<span class="n">gg</span> <span class="o">&lt;-</span> <span class="n">gg</span> <span class="o">+</span> <span class="nf">theme</span><span class="p">(</span> <span class="n">plot.title</span>    <span class="o">=</span> <span class="nf">element_text</span><span class="p">(</span><span class="n">color</span> <span class="o">=</span> <span class="s">&quot;#4A637B&quot;</span> <span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="m">14</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="s">&quot;bold&quot;</span> <span class="p">,</span> <span class="n">hjust</span> <span class="o">=</span> <span class="m">0.5</span><span class="p">),</span>
+            <span class="n">plot.subtitle</span> <span class="o">=</span> <span class="nf">element_text</span><span class="p">(</span><span class="n">color</span> <span class="o">=</span> <span class="s">&quot;#3C91E6&quot;</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="m">10</span><span class="p">,</span> <span class="n">hjust</span> <span class="o">=</span> <span class="m">1</span><span class="p">),</span>
+            <span class="n">plot.caption</span>  <span class="o">=</span> <span class="nf">element_text</span><span class="p">(</span><span class="n">color</span> <span class="o">=</span> <span class="s">&quot;#f46036&quot;</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="s">&quot;italic&quot;</span><span class="p">)</span> <span class="p">)</span> 
+<span class="n">gg</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Utilising-plotly::ggplotly()--for-easily-converting-ggplot-objects-to-interactive!">Utilising <code>plotly::ggplotly()</code>  for easily converting ggplot objects to interactive!<a class="anchor-link" href="#Utilising-plotly::ggplotly()--for-easily-converting-ggplot-objects-to-interactive!">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1"># Notice that plotly is missing some aes elements (caption, subtitle )</span>
+<span class="n">plotly</span><span class="o">::</span><span class="nf">ggplotly</span><span class="p">(</span><span class="n">gg</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1"># Save plotly object as .html file</span>
+<span class="n">htmlwidgets</span><span class="o">::</span><span class="nf">saveWidget</span><span class="p">(</span><span class="n">plotly</span><span class="o">::</span><span class="nf">ggplotly</span><span class="p">(</span><span class="n">gg</span><span class="p">),</span> <span class="n">file</span> <span class="o">=</span> <span class="s">&quot;interactive_pca.html&quot;</span><span class="p">)</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1"># Save ggplot object as .png file</span>
+<span class="n">png_plot_width</span>          <span class="o">=</span>  <span class="m">800</span>                   
+<span class="n">png_plot_height</span>         <span class="o">=</span>  <span class="m">600</span>                  
+<span class="nf">png</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span>  <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;iris_pca.png&quot;</span><span class="p">),</span>
+    <span class="n">width</span>    <span class="o">=</span>  <span class="n">png_plot_width</span><span class="p">,</span> 
+    <span class="n">height</span>   <span class="o">=</span>  <span class="n">png_plot_height</span><span class="p">)</span>
+<span class="nf">plot</span><span class="p">(</span><span class="n">gg</span><span class="p">)</span>
+<span class="nf">dev.off</span><span class="p">()</span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For more ideas you can inspect the <code>{ggfortify}</code> vignette here: 
+<a href="https://cran.r-project.org/web/packages/ggfortify/vignettes/plot_pca.html">https://cran.r-project.org/web/packages/ggfortify/vignettes/plot_pca.html</a></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span>
+</pre></div>
+    </div>
+</div>
+</div>
+</div>
+<hr>
+&copy; 2020 cgpu
+<p><small>Exported from <a href="https://github.com/cgpu/ipynb-research-website/blob/2b64e9bc9931c891cfff3472d797e1ae2f365542/analysis/2-plotting-in-R.ipynb"><code>analysis/2-plotting-in-R.ipynb</code></a> committed by cgpu on Tue Apr 14 23:44:34 2020 <a href="https://github.com/cgpu/ipynb-research-website/commit/2b64e9bc9931c891cfff3472d797e1ae2f365542">revision 1, 2b64e9b</a> <a href="https://stephenslab.github.io/ipynb-website/notes.html#Note-about-commit-ids"><span class="fa fa-question-circle"></span></a></small></p>
+</div>
+</div>
+</body>
+</html>
