@@ -1,6 +1,6 @@
 # The name of the project shown in the navigation bar (it links to the
 # home page).
-name: "Introduction to literate programming with Jupyter Notebooks"
+name: "Literate programming with Jupyter Notebooks"
 
 # Link to the source repository (e.g., on Github, Gitlab).
 repo: "https://github.com/cgpu/ipynb-research-website"
