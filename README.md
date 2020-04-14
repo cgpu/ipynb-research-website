@@ -1,235 +1,151 @@
-# ipynb website: Simple data science website using Jupyter notebooks
+<p align="center">
+  <img src="https://static.wixstatic.com/media/b34882_b300f090387248599125482b6750206c.jpg"  width="250" align="right" >
+</p>
 
-This repository is an adaptable framework for publishing websites from
-[Jupyter interactive notebooks](https://jupyter.org).
+# Jupyter for Jax
+*Hands-on workshop material for using Jupyter Notebooks on the CloudOS platform*
+<br/>
 
-*Please copy and adapt this repository for your own project.*
+<img src="img/cloudos_x_jupy.png"  width="600" align="center" >
 
-View the demo project website
-[here](https://stephenslab.github.io/ipynb-website).
 
-If you find any problems, or would like to suggest new features,
-please open an
-[Issue](https://github.com/stephenslab/ipynb-website/issues). We also
-encourage community contributions, e.g., by forking the repository,
-making your suggested changes, and issuing a pull request.
+## Agenda for the day:
 
-## License
+<br/><br/>
 
-Copyright (c) 2017, Peter Carbonetto & Gao Wang.
+| Time        | Programme       |
+| ----------- | --------------------------------------------------------------------------- |
+| 9:00-9:15   | :wave: Welcome Address - Dr. Anne Deslattes Mays / Dr. Maria Chatzou Dunford       |
+| 9:15-9:30   | Demoing the end result                                                      |
+| 9:30-10:00  | [1. Introduction to literate programming workflows with Jupyter Notebooks](https://github.com/lifebit-ai/jax-jupyter/blob/master/README.md#1-introduction-to-literate-programming-workflows-with-jupyter-notebooks)    |
+| 10:00-10:10 | Configuration of Jupyter Notebooks on Lifebit CloudOS                       |
+| 10:10-11:00 | [2. Exploratory Data Analysis Fundamentals with Pandas in Jupyter Notebooks](https://github.com/lifebit-ai/jax-jupyter/blob/master/README.md#2-exploratory-data-analysis-fundamentals-with-pandas---)     |
+| 11:00-11:20 | :coffee: _Coffee Break_                                                              |
+| 11:20-13:00 | [3. Interactive plotting with R in Jupyter Notebooks](https://github.com/lifebit-ai/jax-jupyter/blob/master/README.md#3-interactive-plotting-with-r-in-jupyter-notebooks)                           |
+| 13:00-14:00 | :bento: _Lunch_                                                                     |
+| 14:00-15:00 | [4. Will it reproduce? Revisiting a publication authored with Jupyter Notebooks](https://github.com/lifebit-ai/jax-jupyter/blob/master/README.md#4-will-it-reproduce-revisiting-a-publication-authored-with-jupyter-notebooks) |
+| 15:00-15:20 | :coffee: _Coffee Break_                                                              |
+| 16:00-16:45 | [5. Integrative Genomics Viewer on Lifebit CloudOS](https://github.com/lifebit-ai/jax-jupyter/blob/master/README.md#4-will-it-reproduce-revisiting-a-publication-authored-with-jupyter-notebooks)                             |
+| 16:50-17:00 | :wave: _Closing Remarks_                                                           |
 
-All source code and software in this repository are made available
-under the terms of the [MIT license](https://opensource.org/licenses/MIT).
+<br/><br/>
 
-## Quick Start
 
-To start your own Jupyter-notebook-based research website, please
-follow these steps.
+### 1. Introduction to literate programming workflows with Jupyter Notebooks on CloudOS
 
-*Note:* These instructions assume that you are managing your project
-files inside a git repository, but this is not strictly necessary; if
-you prefer not to do this, skip the git commands in the steps
-below. (For an introduction to git, see
-[here](https://swcarpentry.github.io/git-novice) or
-[here](https://doi.org/10.1371/journal.pcbi.1004668).)
 
-1. Install Python >= 3.6 and Jupyter. The recommended way to do this
-   is to download and install
-   [Anaconda 3](https://www.continuum.io/anaconda-overview). Note that
-   Python >= 3.6 comes with [pip](https://pip.pypa.io), so you should
-   not need to install it separately.
+#### Set up your instance for version control
 
-2. **Please also note:** If you already have Jupyter installed for
-   Python 2.x (e.g., Anaconda 2), or any other version of Python, then
-   in the next step you will need to be careful that you install SoS
-   for the same Python >= 3.6. In other words, you need Jupyter and
-   SoS to be installed with the same Python >= 3.6. Run `pip
-   --version` to make sure.)
-   
-   ```bash
-   pip --version
-   # pip 9.0.1 from /Users/pcarbo/anaconda3/lib/python3.6/site-packages (python 3.6)
-   ```
+After you have forked the repository, `<USER_aka_you>/jax-jupyter`, click on <img src="img/clone_or_download.png"  width="85" align="center" > and click `SSH` to change the url.
 
-3. Install [SoS](https://github.com/vatlab/SOS) ("Script of Scripts")
-   for Python 3.6:
+#### Configuration of Jupyter Notebooks on Lifebit CloudOS
 
-   ```bash
-   pip install sos-essentials
-   ```
 
-   Note that you may need to
-   include the `--user` flag if you do not have administrative
-   privileges on the computer.
+<details>
+<summary>
+Installing packages
+</summary>
 
-   If you get a warning, "Could not find .egg-info directory in
-   install record for sos...", please ignore it.
+- with `pip`
+- with `conda`
 
-4. Install [git](https://git-scm.com/downloads). 
+To add conda channels on our machine, go to [CloudOS](https://cloudos.lifebit.ai) and initialise a Jupyter Notebook session.
 
-5. At this point, you should have all the software you need to build
-   webpages from the Jupyter notebooks. Please double-check this. For
-   example, this is the setup on my MacBook Air with macOS 10.12.5:
+- Click `New analysis` > `Jupyter Session`
+- Create a new Project by clicking `New` and name it `reproducible-paper.
+- Choose an instance, for example `m1.xlarge` which has 4cpus and 15Gb RAM (it should be more than enough).
 
-   ```bash
-   which python; python --version
-   # /Users/pcarbo/anaconda3/bin/python
-   # Python 3.6.1 :: Anaconda 4.4.0 (x86_64)
-   which jupyter; jupyter --version
-   # /Users/pcarbo/anaconda3/bin/jupyter
-   # 4.3.0
-   which sos; sos --version
-   # /Users/pcarbo/anaconda3/bin/sos
-   # sos 0.9.10.16 for Python 3.6.1
-   which git; git --version
-   $ which git; git --version
-   # /usr/bin/git
-   # git version 2.9.3 (Apple Git-75)
-   ```
+Once the instance has initialised, go to your Jupyter Notebook session and click on the top left corner `File` > `New` > `Terminal`.
 
-6. Make a personal copy of this repository:
+This will open a terminal. Type the following commands to add conda channels, so that we can subsequently install libraries with conda:
 
-   + Download the [latest release](https://github.com/stephenslab/ipynb-website/releases/tag/v0.9.3) of this repository from Github.
+```
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+```
+    
+</details>
 
-   + Create a new git repository (`git init ...`), copy all the files
-     from this repository to the new repository folder.
 
-   + Change the working directory to the new repository folder and
-     commit these files to the new repository:
 
-     ```bash
-     git add ./
-     git commit
-     ```
+#### Jupyter Shortcuts Cheatsheet
 
-   + Alternatively, if you are not using git, create a new folder
-     (`mkdir ...`) and add copy the files to this new folder.
+WIP: Create markdown table for the most handy ones, here is a good place to start: http://maxmelnick.com/2016/04/19/python-beginner-tips-and-tricks.html
 
-7. Inside your new project directory, clean up and then re-generate
-   all the webpages using the SoS release script:
 
-   ```bash
-   sos run release.sos clean
-   sos run release.sos -s force
-   ```
+### 2. Exploratory Data Analysis Fundamentals with Pandas   <img src="https://pythonawesome.com/content/images/2018/05/pandas-logo.png"  width="80" align="center" >
 
-   Or, simply:
+Pandas is an excellent python library that simplifies basic data handling tasks for dataframes. In this part, we will explore a well known dataset, `iris`, and we will learn how to perform basic data cleaning and handling operations using pandas utilities along with python build in functions. We will use Pandas to read tabular files in a dataframe, inspect the dimensions, variable values and number of observations, create subsets of our data based on column and row filtering criteria and retrieve summary statistics for our dataset. In the end of this part, we will have created a basic exporatory data analysis workflow for performing a minimal data quality control routine.
 
-   ```bash
-   ./release.sos clean
-   ./release.sos -s force
-   ```
-   if `release.sos` is granted executable permission.
 
-   **Important note:** Building the webpages from the Jupyter
-   notebooks does not actually run the code in the notebooks. If you
-   would like to run the code prior to generating the webpages, this
-   must be done interactively in Jupyter, or from the command line
-   using `jupyter nbconvert --execute`.
+#### Utils
 
-   All the webpages are created and stored in the "docs"
-   directory. This is convenient for git repositories hosted on
-   Github because 
-   [Github Pages](https://help.github.com/categories/github-pages-basics)
-   can be configured to publish the webpages from the "docs" folder.
 
-8. View the newly generated home page `docs/index.html` in your
-   favorite Web browser.
 
-9. If you would like to upload your new git repository to a git
-   hosting website, do the following:
+<details>
+<summary>
+Basic built-in functions and methods that we will use:
+</summary>
 
-   + Create a new empty repository on tour favorite git hosting
-     website (e.g., [Github](http://github.com),
-     [GitLab](http://gitlab.com), [Bitbucket](https://bitbucket.org).
-     Currently, only Github has been tested; other sites may work as
-     well, but may not support all the website publishing features.
+- `.type()`
+- `.describe()`
+- `.shape()`
+- `.DataFrame()`
 
-   + Determine the URL of the host repository, and add this URL to the
-     repository on your computer with `git remote add origin ...`.
+</details>
 
-   + Upload to the host repository with `git push origin master`.
 
-   + Configure the repository settings to publish the webpages; e.g.,
-     using [Github Pages](https://help.github.com/categories/github-pages-basics)).
 
-10. You are now ready to adapt the Jupyter-notebook-based website for
-   your own project:
+### 3. Interactive plotting with R in Jupyter Notebooks
 
-   + Modify the website settings by editing `config.yml`. See the
-     comments in this file for more detailed instructions.
+For the second part of the workshop, we will switch to R to explore the great functionalities of `ggplot2` and related R packages for publication ready plots. We will first create a suitable input table with helper variable to facilitate the plotting. We will explore the ggplot layers and customise different aesthetics to  create publication ready plots. Finally, we will add interactivity to our plots by using the `plotly` library. We will also explore two extremely handy R packages, `ggpubr` and 
 
-   + Copy, rename or delete the notebooks in the "analysis", "setup"
-     and "license" directories.
 
-   + Edit the notebooks interactively in Jupyter.
 
-   + After you are satisfied with your changes, re-build the modified
-     webpages by running `sos run release.sos`, or use
-     `sos run release.sos -s force` to re-build all the webpages,
-     then commit your changes to the git repository.
+### 4. Will it reproduce? Revisiting a publication authored with Jupyter Notebooks
 
-## More setup details
+What does it take to submit a fully reproducible research piece? Notebooks, Jupyter Notebooks or Rmarkdown documents for example, have been proposed as a promising solution to accompany and bundle together in a reproducible report all the supplementary data of an scientific analysis that get published. Enabling other researchers reproduce our published work, offers the possibility of Postpublication Peer Review. During the Open Data Day 2017, hosted by SPARC and the NIH, within the two-day hackathon organised, an attempt to analyse [all Jupyter notebooks mentioned in PubMed Central](https://github.com/sparcopen/open-research-doathon/issues/25) started, with many contributors from the open source community, including [Daniel Mietchen](https://github.com/Daniel-Mietchen). Thanks to this initiative, a collection of metadata for publications including Jupyter Notebooks was created. At the time, approximately 100 publications from EuropePMC, which included Jupyter Notebooks to assist with reproducibility of their analysis were documented. Our goal for this part of the workshop is to select a publication with a Jupyter Notebook, and try to reproduce the analysis. The objective of this part is to realise the minimal requirements of a reproducible workflow and hopefully explore the literate programming workflow of the publication authors. The repository where this effort was coordinated can be found here: https://github.com/sparcopen/open-research-doathon. A relevant JupyterCon talk by [Daniel Mietchen](https://github.com/Daniel-Mietchen) can be also found here: https://youtu.be/Via7gBrjxHI
 
-+ Whenever you make global changes to the website (e.g., you change
-  the Boostrap theme in `config.yml`), use the `-s force` option to force
-  updates to all the webpages, not just the ones that have been modified.
 
-+ The website is built by [`jnbinder`](https://github.com/vatlab/jnbinder)
-  which does not make any formal releases. This repo releases / ships with
-  its latest stable version.
-  
-  To upgrade `jnbinder` to its latest, type:
-  ```
-  ./release.sos upgrade-jnbinder
-  ```
-  
-  If you are on version < 0.9.2 you need to run this command twice to upgrade:
-  ```
-   ./release.sos upgrade-jnbinder  
-   ./release.sos upgrade-jnbinder
-  ```
+<details>
+<summary>
+Instructions:
+</summary>
 
-## Tips for adapting this framework for your project
 
-+ You can add option `-j` to the command if you want to control the 
-  number of parallel processes that generate the notebook. For example
-  `-j 8` uses 8 processes.
+#### Step 1
+Go to CloudOS and initialise a Jupyter Notebook session:
 
-+ The `include_dir` setting in `config.yml` specifies the project
-  subdirectories containing Jupyter notebooks to render into
-  webpages. If no `index.ipynb` file is provided within a given
-  subdirectory, an index will automatically be generated that lists
-  links to all notebooks under that directory.
+- Click `New analysis` > `Jupyter Session`
+- Create a new Project by clicking `New` and name it `reproducible-paper.
+- Choose an instance, for example `m1.xlarge` which has 4cpus and 15Gb RAM (it should be more than enough).
 
-+ There is also the option of adding a table of contents to each
-  notebook by setting `notebook_toc: True` in `config.yml`.
+We don't need to select data because we are going to bring code and data from github. <img src="https://www.pngfind.com/pngs/m/40-405156_github-octocat-logo-black-and-white-transparent-github.png"  width="25" align="center" >
+ 
 
-+ For the table of contents and the automatically generated index, it
-  is recommended that the notebooks have descriptive names; e.g.,
-  `Plot_station_map.ipynb`. All underscores are automatically treated
-  as spaces, so `Plot_station_map.ipynb` will show as "Plot station
-  map" in the index file and table of contents.
+#### Step 2
+Go to [RainCloudPlots/RainCloudPlots](https://github.com/RainCloudPlots/RainCloudPlots) and click [<img src="img/clone_or_download.png"  width="85" align="center" >](https://github.com/RainCloudPlots/RainCloudPlots) <br> Copy the link to the repository, we will need the link to clone it.
 
-+ So far, only the Cerulean, Flatly and Readable Bootstrap themes have
-  been adapted and tested for this framework. It is possible to select
-  other themes (see [here](https://bootswatch.com) for a larger
-  collection), although they may not work as well. Also note that
-  there may be style conflicts or inconsistencies in the included CSS
-  files; please report these style conflicts by posting an
-  [Issue](https://github.com/stephenslab/ipynb-website/issues).
+#### Step 3 
+a) Go back to your Jupyter Notebook session and click on the top left corner `File` > `New` > `Terminal`.
 
-+ For more website customization details, please refer to the comments
-  in the [config.yml](config.yml) file.
 
-## Credits
+b) Navigate to the `RainCloudPlots/tutorial_python/` folder in your Jupyter Lab session.  <br>
+c) Find and click `raincloud_tutorial_python.ipynb` to launch the Jupyter Notebook.
 
-**ipynb website** was developed by:
 
-Peter Carbonetto and Gao Wang<br>
-Dept. of Human Genetics<br>
-University of Chicago<br>
+#### Step 4
 
-[John Blischak](https://github.com/jdblischak),
-[Matthew Stephens](http://stephenslab.uchicago.edu) and others have
-also contributed to the development of this software.
+We are now ready to start reproducing the analysis, by running each cell of the Notebook.
+
+
+#### Step 5
+Make an issue and file the problems we have noticed
+
+</details>
+
+### 5. Integrative Genomics Viewer on Lifebit CloudOS  
+
+Moving on to our last part of our tutorial, we will learn how to use Integrative Genomics Viewer (IGV) on the CloudOS platform and easily connect data from your cloud provider. Contrary to the usual configuration required to use IGV, there are no prerequisites or installation steps to use IGV on CloudOS, nor the need to copy data. To access data we will simply link the data from our cloud storage provider and continue with the IGV analysis.
+

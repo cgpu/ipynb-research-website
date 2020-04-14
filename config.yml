@@ -1,12 +1,12 @@
 # The name of the project shown in the navigation bar (it links to the
 # home page).
-name: "Divvy data exploration project"
+name: "Introduction to literate programming with Jupyter Notebooks"
 
 # Link to the source repository (e.g., on Github, Gitlab).
-repo: "http://github.com/stephenslab/ipynb-website"
+repo: "https://github.com/cgpu/ipynb-research-website"
 
 # Footer added to the bottom of some webpages.
-footer: "&copy; 2017 Peter Carbonetto &amp; Gao Wang"
+footer: "&copy; 2020 cgpu"
 
 # When set to True, populate the footer of each notebook with the git
 # commit id (SHA1) and commit modification date.
@@ -50,7 +50,7 @@ font: NULL
 
 # Set to True to add a table-of-contents (TOC) to the left-hand side
 # of each of the Jupyter notebook webpages; otherwise, set to False.
-notebook_toc: False
+notebook_toc: True
 
 # Set this variable to enable auto-commit.
 # release_message: "Build website with jnbinder."
@@ -64,7 +64,7 @@ notebook_toc: False
 
 # When set to `True` the empty lines in HTML will be removed. This will
 # make code blocks more compact.
-# remove_whiteline: False
+remove_whiteline: True
 
 # Load a list of password protected folders / pages and their passwords
 password_file: .passwd
